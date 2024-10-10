@@ -1,4 +1,4 @@
-<html><head><base href="https://websim.example.com/">
+<html><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BlockCode: Sistema de Programação em Blocos com Funções Nandraki</title>
@@ -193,7 +193,6 @@
       <block type="nandraki_move_obj"></block>
       <block type="nandraki_create_obj"></block>
       <block type="nandraki_check_collision_and_id"></block>
-      <block type="game_click_start"></block>
       <block type="define_function"></block>
       <block type="game_camada"></block>
       <block type="game_img_frame"></block>
@@ -696,26 +695,6 @@
       var value_obj2 = Blockly.JavaScript.valueToCode(block, 'OBJ2', Blockly.JavaScript.ORDER_ATOMIC);
       var code = `game.check_collision_and_id(${value_obj1}, ${value_obj2})`;
       return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
-
-    Blockly.Blocks['game_click_start'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Iniciar jogo ao clicar");
-        this.appendStatementInput("DO")
-            .setCheck(null);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Inicia o jogo quando o usuário clicar");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_click_start'] = function(block) {
-      var statements_do = Blockly.JavaScript.statementToCode(block, 'DO');
-      var code = `game.click_start = () => {\n${statements_do}};\n`;
-      return code;
     };
 
     Blockly.Blocks['define_function'] = {
