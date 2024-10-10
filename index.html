@@ -1,161 +1,1009 @@
-<!DOCTYPE html>
-<html>
-<head>
+<html><head><base href="https://websim.example.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlockCode: Sistema de Programação em Blocos com Funções Nandraki</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/blockly.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/blocks.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://unpkg.com/nandraki@2.5.8/nandraki.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #111111;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  margin: 0;
-  padding: 20px;
-  text-align: center;
-}
-
-.close {
-  cursor: pointer;
-  font-size: 25px;
-  margin-left: 5px;
-  color: #ffffff;
-  margin-top: -10px;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  background-color: #222222;
-  margin: 0 auto;
-  padding: 0;
-  border: 1px solid #888;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  overflow: auto;
-}
-
-.editor {
-  height: calc(100vh - 40px);
-}
-
-textarea {
-  width: 100%;
-  height: 70%;
-  border: none;
-  padding: 10px;
-  box-sizing: border-box;
-  background-color: #333333;
-  color: #ffffff;
-}
-
-button {
-  margin-top: 15px;
-  background-color: #00b2ff;
-  border: none;
-  color: #ffffff;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 18px;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #00e6ff;
-}
-
-#previewFrame {
-  width: 100%;
-  height: 100%;
-  border: 1px solid #000;
-    background-color: #ffffff;
-  color: #ffffff;
-}
-  h1 {
-    color: #fff;
-    font-size: 50px;
-    font-family: sans-serif;
-    font-weight: bold;
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+  #engineLink {
+    background-color: #f8f8f8;
+    padding: 10px;
     text-align: center;
-    text-shadow: 0 0 10px black;
-}
+    border-bottom: 1px solid #ddd;
+  }
+  #engineLink a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 10px;
+  }
+  #engineLink a:hover {
+    text-decoration: underline;
+  }
+  #engineLink input {
+    margin-top: 10px;
+    width: 80%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+  }
+  #blocklyDiv {
+    flex-grow: 1;
+    width: 100%;
+    height: calc(60vh - 40px);
+  }
+  #bottomPanel {
+    height: 40vh;
+    display: flex;
+    border-top: 2px solid #ddd;
+  }
+  #outputDiv, #codeDiv {
+    width: 50%;
+    height: 100%;
+    background-color: #fff;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #outputDiv {
+    border-right: 1px solid #ddd;
+  }
+  #buttonContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+  }
+  #runButton, #copyButton, #openModalButton {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  #runButton {
+    background-color: #4CAF50;
+  }
+  #copyButton {
+    background-color: #008CBA;
+  }
+  #openModalButton {
+    background-color: #e91e63;
+  }
+  #runButton:hover {
+    background-color: #45a049;
+  }
+  #copyButton:hover {
+    background-color: #007B9A;
+  }
+  #openModalButton:hover {
+    background-color: #d81b60;
+  }
+  #languageSelector {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+  }
+  #languageSelect {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    font-size: 14px;
+  }
+  .CodeMirror {
+    height: 100%;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  #gameCode {
+    width: 100%;
+    margin-bottom: 10px;
+  }
 </style>
 </head>
 <body>
-  <h1>      Nandraki </h1>
-  <div class="editor">
-    <button id="salvarButton">💾</button>
-    <button id="runButton">▶</button>
-    <textarea id="htmlCode" placeholder="Enter HTML code here..."></textarea>
+  <div id="engineLink">
+    <a href="https://github.com/ronanbastos/Nandraki.js/blob/main/nandraki.js" target="_blank">Nandraki.js Game Engine</a>
+    | 
+    <a href="https://ronanbastos.github.io/Documentation-Nandraki.js/" target="_blank">Documentação</a>
+    <br>
+    <input type="text" id="engineLinkInput" placeholder="Digite o link da engine" value="https://unpkg.com/nandraki@2.5.8/nandraki.js">
+  </div>
+  <div id="blocklyDiv"></div>
+  <div id="bottomPanel">
+    <div id="outputDiv"></div>
+    <div id="codeDiv"></div>
+  </div>
+  <div id="buttonContainer">
+    <button id="runButton">Executar</button>
+    <button id="copyButton">Copiar Código</button>
+    <button id="openModalButton">Abrir Modal</button>
+  </div>
+  <div id="languageSelector">
+    <select id="languageSelect">
+      <option value="pt">Português</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+    </select>
   </div>
 
-  <div id="myModal" class="modal">
+  <div id="gameModal" class="modal">
     <div class="modal-content">
-      <button class="close">⏸</button>
-      <iframe id="previewFrame"></iframe>
+      <span class="close">&times;</span>
+      <h2>Estrutura do Jogo</h2>
+      <textarea id="gameCode" rows="20" cols="80"></textarea>
+      <button id="runGameButton">Executar Jogo</button>
     </div>
   </div>
 
+  <xml id="toolbox" style="display: none">
+    <category name="Nandraki" colour="#5C81A6">
+      <block type="nandraki_create_sprite"></block>
+      <block type="nandraki_constructor"></block>
+      <block type="nandraki_create_ui"></block>
+      <block type="nandraki_move_obj"></block>
+      <block type="nandraki_create_obj"></block>
+      <block type="nandraki_check_collision_and_id"></block>
+      <block type="game_click_start"></block>
+      <block type="define_function"></block>
+      <block type="game_camada"></block>
+      <block type="game_img_frame"></block>
+      <block type="game_spawn_sprite"></block>
+      <block type="game_force_obj"></block>
+    </category>
+    <category name="Lógica" colour="#5C81A6">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+    </category>
+    <category name="Loops" colour="#5C81A6">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="controls_whileUntil"></block>
+      <block type="controls_for">
+        <value name="FROM">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="TO">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+        <value name="BY">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+    <category name="Matemática" colour="#5C68A6">
+      <block type="math_number"></block>
+      <block type="math_arithmetic">
+        <value name="A">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="B">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="math_single">
+        <value name="NUM">
+          <shadow type="math_number">
+            <field name="NUM">9</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+    <category name="Texto" colour="#5CA68D">
+      <block type="text"></block>
+      <block type="text_join"></block>
+      <block type="console_log"></block>
+      <block type="print"></block>
+      <block type="alert"></block>
+    </category>
+    <category name="Variáveis" colour="#A65C81">
+      <block type="variables_set"></block>
+      <block type="variables_get"></block>
+      <block type="let_variable"></block>
+      <block type="const_variable"></block>
+      <block type="global_var_variable"></block>
+    </category>
+    <category name="Funções" colour="#9A5CA6" custom="PROCEDURE"></category>
+  </xml>
+
   <script>
-    const htmlCodeTextarea = document.getElementById('htmlCode');
-    const runButton = document.getElementById('runButton');
-    const modal = document.getElementById('myModal');
-    const previewFrame = document.getElementById('previewFrame');
-    const salvarButton = document.getElementById('salvarButton');
-
-    runButton.addEventListener('click', (event) => {
-      event.stopPropagation(); // Impede que o evento de clique se propague para o modal
-      const htmlCode = htmlCodeTextarea.value;
-      const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-      previewDoc.open();
-      previewDoc.write(htmlCode);
-      previewDoc.close();
-      modal.style.display = 'block';
-    });
-
-    const closeModal = () => {
-      modal.style.display = 'none';
-      previewFrame.src = 'about:blank';
+    const translations = {
+      pt: {
+        runButton: "Executar",
+        copyButton: "Copiar Código",
+        blocks: {
+          logic: "Lógica",
+          loops: "Loops",
+          math: "Matemática",
+          text: "Texto",
+          lists: "Listas",
+          color: "Cor",
+          variables: "Variáveis",
+          functions: "Funções"
+        }
+      },
+      en: {
+        runButton: "Run",
+        copyButton: "Copy Code",
+        blocks: {
+          logic: "Logic",
+          loops: "Loops",
+          math: "Math",
+          text: "Text",
+          lists: "Lists",
+          color: "Color",
+          variables: "Variables",
+          functions: "Functions"
+        }
+      },
+      es: {
+        runButton: "Ejecutar",
+        copyButton: "Copiar Código",
+        blocks: {
+          logic: "Lógica",
+          loops: "Bucles",
+          math: "Matemáticas",
+          text: "Texto",
+          lists: "Listas",
+          color: "Color",
+          variables: "Variables",
+          functions: "Funciones"
+        }
+      }
     };
 
-    const closeSpan = document.getElementsByClassName('close')[0];
-    closeSpan.addEventListener('click', closeModal);
+    function updateBlockLabels(lang) {
+      const categories = workspace.toolbox_.contents_;
+      categories.forEach(category => {
+        const name = category.name_;
+        if (translations[lang].blocks[name.toLowerCase()]) {
+          category.name_ = translations[lang].blocks[name.toLowerCase()];
+          category.toolboxItemDef_.name = category.name_;
+        }
+      });
+      workspace.toolbox_.refreshSelection();
+    }
 
-    window.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        closeModal();
+    function updateLanguage(lang) {
+      document.getElementById('runButton').textContent = translations[lang].runButton;
+      document.getElementById('copyButton').textContent = translations[lang].copyButton;
+      updateBlockLabels(lang);
+    }
+
+    document.getElementById('languageSelect').addEventListener('change', function() {
+      updateLanguage(this.value);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLanguage('pt');
+    });
+
+    var workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      scrollbars: true,
+      trashcan: true,
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2
+      },
+    });
+
+    var outputDiv = document.getElementById('outputDiv');
+    var codeEditor = CodeMirror(document.getElementById('codeDiv'), {
+      mode: 'javascript',
+      lineNumbers: true,
+      theme: 'default'
+    });
+
+    function updateCode() {
+      var code = Blockly.JavaScript.workspaceToCode(workspace);
+      codeEditor.setValue(code);
+
+      const gameCode = gameCodeTextarea.value;
+      const updatedGameCode = gameCode.replace(
+        /\/\/ codigo do bloco aqui/,
+        code
+      );
+      gameCodeTextarea.value = updatedGameCode;
+    }
+
+    workspace.addChangeListener(updateCode);
+
+    document.getElementById('runButton').addEventListener('click', function() {
+      var code = codeEditor.getValue();
+      try {
+        outputDiv.innerHTML = '';
+        eval(code);
+      } catch (e) {
+        outputDiv.innerHTML = 'Erro: ' + e;
       }
     });
 
-    salvarButton.addEventListener('click', () => {
-      const htmlCode = htmlCodeTextarea.value;
-      // Verificar se a plataforma é Android e a função de comunicação nativa está disponível
-      if (/Android/i.test(navigator.userAgent) && window.webkit && window.webkit.messageHandlers) {
-        // Enviar mensagem para o aplicativo nativo solicitar o download
-        window.webkit.messageHandlers.download.postMessage(htmlCode);
-      } else {
-        // Fallback para download padrão no navegador
-        const downloadLink = document.createElement('a');
-        downloadLink.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlCode));
-        downloadLink.setAttribute('download', 'meu_html.html');
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-      }
+    document.getElementById('copyButton').addEventListener('click', function() {
+      var code = codeEditor.getValue();
+      navigator.clipboard.writeText(code).then(function() {
+        alert('Código copiado para a área de transferência!');
+      }, function(err) {
+        console.error('Erro ao copiar código: ', err);
+      });
     });
+
+    const modal = document.getElementById("gameModal");
+    const openModalButton = document.getElementById("openModalButton");
+    const closeButton = document.getElementsByClassName("close")[0];
+    const gameCodeTextarea = document.getElementById("gameCode");
+    const runGameButton = document.getElementById("runGameButton");
+
+    // Get the current CDN link
+    const cdnLink = document.getElementById("engineLinkInput").value;
+
+    // Set the initial content of the textarea
+    gameCodeTextarea.value = `<html>
+<head>
+  <script src="${cdnLink}"><\/script>
+</head>
+<body>
+  <script>
+    Nandraki.create_ui("text_id","[hello world]")
+    myjogo = {
+      start : function(){
+        // codigo do bloco aqui
+      },	
+    }
+
+    fps=60;	
+    game.update(myjogo.start,fps);  
+  <\/script>
+</body>
+</html>`;
+
+    openModalButton.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    closeButton.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    runGameButton.onclick = function() {
+      const gameWindow = window.open("", "Game Window", "width=800,height=600");
+      gameWindow.document.write(gameCodeTextarea.value);
+      gameWindow.document.close();
+    }
+
+    // Update the CDN link when it changes
+    document.getElementById("engineLinkInput").addEventListener("change", function() {
+      const newCdnLink = this.value;
+      const currentCode = gameCodeTextarea.value;
+      const updatedCode = currentCode.replace(/<script src=".*"><\/script>/, `<script src="${newCdnLink}"><\/script>`);
+      gameCodeTextarea.value = updatedCode;
+    });
+
+    Blockly.Blocks['nandraki_create_sprite'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Criar Sprite");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("LAYERS")
+            .setCheck("Number")
+            .appendField("Camadas");
+        this.appendValueInput("SPRITE1")
+            .setCheck("String")
+            .appendField("Sprite 1");
+        this.appendValueInput("SPRITE2")
+            .setCheck("String")
+            .appendField("Sprite 2");
+        this.appendValueInput("SPRITE3")
+            .setCheck("String")
+            .appendField("Sprite 3");
+        this.appendValueInput("SPRITE4")
+            .setCheck("String")
+            .appendField("Sprite 4");
+        this.appendValueInput("SPRITE5")
+            .setCheck("String")
+            .appendField("Sprite 5");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Largura");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Altura");
+        this.appendValueInput("FRAMES")
+            .setCheck("Number")
+            .appendField("Frames");
+        this.appendValueInput("FPS")
+            .setCheck("Number")
+            .appendField("FPS");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Cria um novo sprite no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_create_sprite'] = function(block) {
+      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_layers = Blockly.JavaScript.valueToCode(block, 'LAYERS', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_sprite1 = Blockly.JavaScript.valueToCode(block, 'SPRITE1', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_sprite2 = Blockly.JavaScript.valueToCode(block, 'SPRITE2', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_sprite3 = Blockly.JavaScript.valueToCode(block, 'SPRITE3', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_sprite4 = Blockly.JavaScript.valueToCode(block, 'SPRITE4', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_sprite5 = Blockly.JavaScript.valueToCode(block, 'SPRITE5', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_fps = Blockly.JavaScript.valueToCode(block, 'FPS', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+      
+      var code = `Nandraki.create_sprite(${value_id}, ${value_layers}, ${value_sprite1}, ${value_sprite2}, ${value_sprite3}, ${value_sprite4}, ${value_sprite5}, ${value_width}, ${value_height}, ${value_frames}, ${value_fps}, ${value_x}, ${value_y});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['nandraki_constructor'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Construtor Nandraki");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Largura");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Altura");
+        this.appendValueInput("FPS")
+            .setCheck("Number")
+            .appendField("FPS");
+        this.appendValueInput("GRAVITY")
+            .setCheck("Number")
+            .appendField("Gravidade");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Construtor para inicializar o jogo Nandraki");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_constructor'] = function(block) {
+      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_fps = Blockly.JavaScript.valueToCode(block, 'FPS', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_gravity = Blockly.JavaScript.valueToCode(block, 'GRAVITY', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `var game = new Nandraki(${value_width}, ${value_height}, ${value_fps}, ${value_gravity});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['nandraki_create_ui'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Criar UI");
+        this.appendValueInput("NAME")
+            .setCheck("String")
+            .appendField("Nome");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Largura");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Altura");
+        this.appendValueInput("COLOR")
+            .setCheck("String")
+            .appendField("Cor");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Cria um elemento de UI no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_create_ui'] = function(block) {
+      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.create_ui(${value_name}, ${value_x}, ${value_y}, ${value_width}, ${value_height}, ${value_color});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['nandraki_move_obj'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Mover Objeto");
+        this.appendValueInput("NAME")
+            .setCheck("String")
+            .appendField("Nome");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Move um objeto no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_move_obj'] = function(block) {
+      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.move_obj(${value_name}, ${value_x}, ${value_y});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['nandraki_create_obj'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Criar Objeto");
+        this.appendValueInput("NAME")
+            .setCheck("String")
+            .appendField("Nome");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Largura");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Altura");
+        this.appendValueInput("COLOR")
+            .setCheck("String")
+            .appendField("Cor");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Cria um novo objeto no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_create_obj'] = function(block) {
+      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.create_obj(${value_name}, ${value_x}, ${value_y}, ${value_width}, ${value_height}, ${value_color});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['nandraki_check_collision_and_id'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Verificar Colisão e ID");
+        this.appendValueInput("OBJ1")
+            .setCheck("String")
+            .appendField("Objeto 1");
+        this.appendValueInput("OBJ2")
+            .setCheck("String")
+            .appendField("Objeto 2");
+        this.setOutput(true, "Boolean");
+        this.setColour(230);
+        this.setTooltip("Verifica colisão entre dois objetos e compara seus IDs");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['nandraki_check_collision_and_id'] = function(block) {
+      var value_obj1 = Blockly.JavaScript.valueToCode(block, 'OBJ1', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_obj2 = Blockly.JavaScript.valueToCode(block, 'OBJ2', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.check_collision_and_id(${value_obj1}, ${value_obj2})`;
+      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    };
+
+    Blockly.Blocks['game_click_start'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Iniciar jogo ao clicar");
+        this.appendStatementInput("DO")
+            .setCheck(null);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Inicia o jogo quando o usuário clicar");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_click_start'] = function(block) {
+      var statements_do = Blockly.JavaScript.statementToCode(block, 'DO');
+      var code = `game.click_start = () => {\n${statements_do}};\n`;
+      return code;
+    };
+
+    Blockly.Blocks['define_function'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Definir função")
+            .appendField(new Blockly.FieldTextInput("nomeDaFuncao"), "FUNC_NAME");
+        this.appendStatementInput("FUNC_BODY")
+            .setCheck(null);
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(290);
+        this.setTooltip("Define uma nova função");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['define_function'] = function(block) {
+      var text_func_name = block.getFieldValue('FUNC_NAME');
+      var statements_func_body = Blockly.JavaScript.statementToCode(block, 'FUNC_BODY');
+      var code = `function ${text_func_name}() {\n${statements_func_body}}\n`;
+      return code;
+    };
+
+    Blockly.Blocks['game_camada'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("game.camada");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("DEPTH")
+            .setCheck("Number")
+            .appendField("Profundidade");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Define a camada de um objeto no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_camada'] = function(block) {
+      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_depth = Blockly.JavaScript.valueToCode(block, 'DEPTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.camada(${value_id}, ${value_depth});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['game_img_frame'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("game.img_frame");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("IMG")
+            .setCheck("String")
+            .appendField("Imagem");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Largura");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Altura");
+        this.appendValueInput("FRAMES")
+            .setCheck("Number")
+            .appendField("Frames");
+        this.appendValueInput("CURRENT_FRAME")
+            .setCheck("Number")
+            .appendField("Frame Atual");
+        this.appendValueInput("START_FRAME")
+            .setCheck("Number")
+            .appendField("Frame Inicial");
+        this.appendValueInput("END_FRAME")
+            .setCheck("Number")
+            .appendField("Frame Final");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Define um frame de imagem para um objeto no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_img_frame'] = function(block) {
+      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_img = Blockly.JavaScript.valueToCode(block, 'IMG', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_current_frame = Blockly.JavaScript.valueToCode(block, 'CURRENT_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_start_frame = Blockly.JavaScript.valueToCode(block, 'START_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_end_frame = Blockly.JavaScript.valueToCode(block, 'END_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.img_frame(${value_id}, ${value_img}, ${value_width}, ${value_height}, ${value_frames}, ${value_current_frame}, ${value_start_frame}, ${value_end_frame});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['game_spawn_sprite'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("game.spawn_sprite");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("IMG")
+            .setCheck("String")
+            .appendField("Imagem");
+        this.appendValueInput("LEFT")
+            .setCheck("Number")
+            .appendField("Esquerda");
+        this.appendValueInput("TOP")
+            .setCheck("Number")
+            .appendField("Topo");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Cria um novo sprite no jogo");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_spawn_sprite'] = function(block) {
+      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_img = Blockly.JavaScript.valueToCode(block, 'IMG', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.spawn_sprite(${value_id}, ${value_img}, ${value_left}, ${value_top});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['game_force_obj'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("game.force_obj");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y");
+        this.appendValueInput("ROTATE")
+            .setCheck("Boolean")
+            .appendField("Rotacionar");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Aplica força a um objeto no jogo, com opção de rotação");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_force_obj'] = function(block) {
+      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
+      var value_rotate = Blockly.JavaScript.valueToCode(block, 'ROTATE', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = `game.force_obj(${value_id}, ${value_x}, ${value_y}, ${value_rotate});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['let_variable'] = {
+      init: function() {
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("let")
+            .appendField(new Blockly.FieldTextInput("item"), "VAR");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a local variable using 'let'");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['let_variable'] = function(block) {
+      var variable_name = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
+      var code = 'let ' + variable_name + ' = ' + value + ';\n';
+      return code;
+    };
+
+    Blockly.Blocks['const_variable'] = {
+      init: function() {
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("const")
+            .appendField(new Blockly.FieldTextInput("item"), "VAR");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a constant using 'const'");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['const_variable'] = function(block) {
+      var variable_name = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
+      var code = 'const ' + variable_name + ' = ' + value + ';\n';
+      return code;
+    };
+
+    Blockly.Blocks['global_var_variable'] = {
+      init: function() {
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("var (global)")
+            .appendField(new Blockly.FieldTextInput("item"), "VAR");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a global variable using 'var'");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['global_var_variable'] = function(block) {
+      var variable_name = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
+      var code = 'var ' + variable_name + ' = ' + value + ';\n';
+      return code;
+    };
+
+    Blockly.Blocks['console_log'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("console.log");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Log a message to the console");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['console_log'] = function(block) {
+      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = 'console.log(' + value_text + ');\n';
+      return code;
+    };
+
+    Blockly.Blocks['print'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("print");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Print a message");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['print'] = function(block) {
+      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = 'print(' + value_text + ');\n';
+      return code;
+    };
+
+    Blockly.Blocks['alert'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("alert");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Show an alert message");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['alert'] = function(block) {
+      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
+      var code = 'alert(' + value_text + ');\n';
+      return code;
+    };
+
   </script>
 </body>
 </html>
