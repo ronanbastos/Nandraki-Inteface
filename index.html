@@ -209,18 +209,35 @@
   </div>
 
   <xml id="toolbox" style="display: none">
-    <category name="Nandraki" colour="#5C81A6">
-      <block type="nandraki_create_sprite"></block>
-      <block type="nandraki_constructor"></block>
-      <block type="nandraki_create_ui"></block>
-      <block type="nandraki_move_obj"></block>
-      <block type="nandraki_create_obj"></block>
-      <block type="nandraki_check_collision_and_id"></block>
-      <block type="define_function"></block>
-      <block type="game_camada"></block>
-      <block type="game_img_frame"></block>
+    <category name="Nandraki" colour="#FF6B6B">
+      <block type="game_print"></block>
+      <block type="create_sprite"></block>
+      <block type="create_obj"></block>
+      <block type="create_ui"></block>
+      <block type="game_coord"></block>
+      <block type="game_colidir"></block>
+      <block type="game_canvas_start"></block>
+      <block type="game_canvas_text"></block>
+      <block type="game_canvas_arc"></block>
+      <block type="game_click"></block>
       <block type="game_spawn_sprite"></block>
-      <block type="game_force_obj"></block>
+      <block type="game_start_sound"></block>
+      <block type="game_bd_load"></block>
+      <block type="game_bd_remove"></block>
+      <block type="game_bd_clear"></block>
+      <block type="game_bd_save"></block>
+      <block type="game_move_touch"></block>
+      <block type="console_log"></block>
+      <block type="print"></block>
+      <block type="alert"></block>
+      <block type="join_strings"></block>
+      <block type="compare_variables"></block>
+      <block type="string_length"></block>
+      <block type="int_to_string"></block>
+      <block type="let_variable"></block>
+      <block type="const_variable"></block>
+      <block type="global_var_variable"></block>
+      <block type="game_display"></block>
     </category>
     <category name="Lógica" colour="#5C81A6">
       <block type="controls_if"></block>
@@ -283,6 +300,10 @@
       <block type="console_log"></block>
       <block type="print"></block>
       <block type="alert"></block>
+      <block type="join_strings"></block>
+      <block type="compare_variables"></block>
+      <block type="string_length"></block>
+      <block type="int_to_string"></block>
     </category>
     <category name="Variáveis" colour="#A65C81">
       <block type="variables_set"></block>
@@ -295,10 +316,712 @@
   </xml>
 
   <script>
+    Blockly.Blocks['game_print'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Print Message");
+        this.appendValueInput("MESSAGE")
+            .setCheck("String")
+            .appendField("Message");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Print a message using game.print()");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_print'] = function(block) {
+      var message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return `game.print(${message});\n`;
+    };
+
+    Blockly.Blocks['game_coord'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Get Coordinates of");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("Object ID");
+        this.setOutput(true, "Array");
+        this.setColour(230);
+        this.setTooltip("Get the coordinates [x,y] of an object by its ID");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_coord'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var code = `game.coord(${id})`;
+      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    };
+
+    Blockly.Blocks['create_sprite'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Create Sprite");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("LAYER")
+            .setCheck("Number")
+            .appendField("Layer");
+        this.appendValueInput("IMAGE")
+            .setCheck("String")
+            .appendField("Image Path");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Width");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Height");
+        this.appendValueInput("FRAMES")
+            .setCheck("Number")
+            .appendField("Frames");
+        this.appendValueInput("SPEED")
+            .setCheck("Number")
+            .appendField("Speed");
+        this.appendValueInput("TOP")
+            .setCheck("Number")
+            .appendField("Top");
+        this.appendValueInput("LEFT")
+            .setCheck("Number")
+            .appendField("Left");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Create a sprite with Nandraki");
+      }
+    };
+
+    Blockly.Blocks['create_obj'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Create Object");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Width");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Height");
+        this.appendValueInput("TOP")
+            .setCheck("Number")
+            .appendField("Top");
+        this.appendValueInput("LEFT")
+            .setCheck("Number")
+            .appendField("Left");
+        this.appendValueInput("DEBUG")
+            .setCheck("Boolean")
+            .appendField("Debug");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Create an object with Nandraki");
+      }
+    };
+
+    Blockly.Blocks['create_ui'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Create UI");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("TEXT")
+            .setCheck("String")
+            .appendField("Text");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Width");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Height");
+        this.appendValueInput("TOP")
+            .setCheck("Number")
+            .appendField("Top");
+        this.appendValueInput("LEFT")
+            .setCheck("Number")
+            .appendField("Left");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Create a UI element with Nandraki");
+      }
+    };
+
+    Blockly.JavaScript['create_sprite'] = function(block) {
+      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      const layer = Blockly.JavaScript.valueToCode(block, 'LAYER', Blockly.JavaScript.ORDER_ATOMIC) || '1';
+      const image = Blockly.JavaScript.valueToCode(block, 'IMAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '64';
+      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '64';
+      const frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC) || '1';
+      const speed = Blockly.JavaScript.valueToCode(block, 'SPEED', Blockly.JavaScript.ORDER_ATOMIC) || '1';
+      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+
+      return `Nandraki.create_sprite(${id}, ${layer}, ${image}, null, null, null, null, ${width}, ${height}, ${frames}, ${speed}, ${top}, ${left});\n`;
+    };
+
+    Blockly.JavaScript['create_obj'] = function(block) {
+      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const debug = Blockly.JavaScript.valueToCode(block, 'DEBUG', Blockly.JavaScript.ORDER_ATOMIC) || 'false';
+
+      return `Nandraki.create_obj(${id}, ${width}, ${height}, ${top}, ${left}, ${debug});\n`;
+    };
+
+    Blockly.JavaScript['create_ui'] = function(block) {
+      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      const text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+
+      return `Nandraki.create_ui(${id}, ${text}, ${width}, ${height}, ${top}, ${left});\n`;
+    };
+
+    Blockly.Blocks['game_colidir'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Check Collision between");
+        this.appendValueInput("ID1")
+            .setCheck("String")
+            .appendField("Object 1 ID");
+        this.appendValueInput("ID2")
+            .setCheck("String")
+            .appendField("Object 2 ID");
+        this.setOutput(true, "Boolean");
+        this.setColour(230);
+        this.setTooltip("Check if two objects are colliding");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_colidir'] = function(block) {
+      var id1 = Blockly.JavaScript.valueToCode(block, 'ID1', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var id2 = Blockly.JavaScript.valueToCode(block, 'ID2', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var code = `game.colidir(${id1}, ${id2})`;
+      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    };
+
+    Blockly.Blocks['game_move_touch'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Move by Touch");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("Object ID");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Move an object by touch/mouse input");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_move_touch'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return `game.move_touch(${id});\n`;
+    };
+
+    Blockly.Blocks['game_canvas_start'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Create Canvas");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("WIDTH")
+            .setCheck("Number")
+            .appendField("Width");
+        this.appendValueInput("HEIGHT")
+            .setCheck("Number")
+            .appendField("Height");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Create a canvas with specified dimensions");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_canvas_start'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '800';
+      var height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '600';
+      
+      return `game.canvas_start(${id}, ${width}, ${height});\n`;
+    };
+
+    Blockly.Blocks['game_canvas_text'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Draw Canvas Text");
+        this.appendValueInput("TEXT")
+            .setCheck("String")
+            .appendField("Text");
+        this.appendValueInput("FONT")
+            .setCheck("String")
+            .appendField("Font");
+        this.appendValueInput("COLOR")
+            .setCheck("String")
+            .appendField("Color");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X Position");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y Position");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw text on the canvas with specified properties");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_canvas_text'] = function(block) {
+      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var font = Blockly.JavaScript.valueToCode(block, 'FONT', Blockly.JavaScript.ORDER_ATOMIC) || '"12px Arial"';
+      var color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC) || '"black"';
+      var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      
+      return `game.canvas_text(${text}, ${font}, ${color}, ${x}, ${y});\n`;
+    };
+
+    Blockly.Blocks['game_canvas_arc'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Draw Canvas Arc");
+        this.appendValueInput("X")
+            .setCheck("Number")
+            .appendField("X Position");
+        this.appendValueInput("Y")
+            .setCheck("Number")
+            .appendField("Y Position"); 
+        this.appendValueInput("FONT")
+            .setCheck("Number")
+            .appendField("Font/Size");
+        this.appendValueInput("B")
+            .setCheck("Number")
+            .appendField("Begin Angle");
+        this.appendValueInput("P")
+            .setCheck("Number")
+            .appendField("End Angle");
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw an arc on the canvas");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_canvas_arc'] = function(block) {
+      var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var font = Blockly.JavaScript.valueToCode(block, 'FONT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var b = Blockly.JavaScript.valueToCode(block, 'B', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var p = Blockly.JavaScript.valueToCode(block, 'P', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      
+      return `game.canvas_arc(${x}, ${y}, ${font}, ${b}, ${p});\n`;
+    };
+
+    Blockly.Blocks['game_click'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("On Click");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("Object ID");
+        this.appendStatementInput("FUNC")
+            .setCheck(null)
+            .appendField("Do");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Execute code when object is clicked");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_click'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var func = Blockly.JavaScript.statementToCode(block, 'FUNC') || '';
+      var code = `game.click(${id}, function() {\n${func}});\n`;
+      return code;
+    };
+
+    Blockly.Blocks['game_spawn_sprite'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Spawn Sprite");
+        this.appendValueInput("ID")
+            .setCheck("String")
+            .appendField("ID");
+        this.appendValueInput("IMAGE")
+            .setCheck("String")
+            .appendField("Image Path");
+        this.appendValueInput("LEFT")
+            .setCheck("Number")
+            .appendField("Left Position");
+        this.appendValueInput("TOP")
+            .setCheck("Number")
+            .appendField("Top Position");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Spawn a sprite at specified position");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_spawn_sprite'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var image = Blockly.JavaScript.valueToCode(block, 'IMAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      
+      return `game.spawn_sprite(${id}, ${image}, ${left}, ${top});\n`;
+    };
+
+    Blockly.Blocks['game_start_sound'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Start Sound");
+        this.appendValueInput("SOUND_SRC")
+            .setCheck("String")
+            .appendField("Sound Source");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Start playing a sound from the specified source");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_start_sound'] = function(block) {
+      var soundSrc = Blockly.JavaScript.valueToCode(block, 'SOUND_SRC', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return `game.start_som(${soundSrc});\n`;
+    };
+
+    Blockly.Blocks['game_bd_load'] = {
+      init: function() {
+        this.appendValueInput("VALUE")
+            .setCheck("String")
+            .appendField("Load from Database");
+        this.setOutput(true, null);
+        this.setColour(230);
+        this.setTooltip("Load a value from the database");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['game_bd_remove'] = {
+      init: function() {
+        this.appendValueInput("VALUE")
+            .setCheck("String")
+            .appendField("Remove from Database");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Remove a value from the database");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['game_bd_clear'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Clear Database");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Clear all data from the database");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['game_bd_save'] = {
+      init: function() {
+        this.appendValueInput("KEY")
+            .setCheck("String")
+            .appendField("Save to Database Key");
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("Value");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Save a key-value pair to the database");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_bd_load'] = function(block) {
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var code = `game.bd_load(${value})`;
+      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    };
+
+    Blockly.JavaScript['game_bd_remove'] = function(block) {
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return `game.bd_remove(${value});\n`;
+    };
+
+    Blockly.JavaScript['game_bd_clear'] = function(block) {
+      return 'game.bd_clear();\n';
+    };
+
+    Blockly.JavaScript['game_bd_save'] = function(block) {
+      var key = Blockly.JavaScript.valueToCode(block, 'KEY', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return `game.bd_save(${key}, ${value});\n`;
+    };
+
+    Blockly.Blocks['console_log'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("console.log");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Log a message to the console");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['console_log'] = function(block) {
+      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return 'console.log(' + text + ');\n';
+    };
+
+    Blockly.Blocks['print'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("print");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Print a message");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['print'] = function(block) {
+      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return 'console.log(' + text + ');\n';
+    };
+
+    Blockly.Blocks['alert'] = {
+      init: function() {
+        this.appendValueInput("TEXT")
+            .setCheck(null)
+            .appendField("alert");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Show an alert message");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['alert'] = function(block) {
+      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return 'alert(' + text + ');\n';
+    };
+
+    Blockly.Blocks['join_strings'] = {
+      init: function() {
+        this.appendValueInput("STRING1")
+            .setCheck("String")
+            .appendField("join");
+        this.appendValueInput("STRING2")
+            .setCheck("String")
+            .appendField("and");
+        this.setOutput(true, "String");
+        this.setColour(160);
+        this.setTooltip("Join two strings together");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['join_strings'] = function(block) {
+      var string1 = Blockly.JavaScript.valueToCode(block, 'STRING1', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var string2 = Blockly.JavaScript.valueToCode(block, 'STRING2', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return [string1 + ' + ' + string2, Blockly.JavaScript.ORDER_ADDITION];
+    };
+
+    Blockly.Blocks['compare_variables'] = {
+      init: function() {
+        this.appendValueInput("VAR1")
+            .setCheck(null)
+            .appendField("compare");
+        this.appendValueInput("VAR2")
+            .setCheck(null)
+            .appendField("with");
+        this.setOutput(true, "Boolean");
+        this.setColour(160);
+        this.setTooltip("Compare two variables");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['compare_variables'] = function(block) {
+      var var1 = Blockly.JavaScript.valueToCode(block, 'VAR1', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      var var2 = Blockly.JavaScript.valueToCode(block, 'VAR2', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      return [var1 + ' === ' + var2, Blockly.JavaScript.ORDER_EQUALITY];
+    };
+
+    Blockly.Blocks['string_length'] = {
+      init: function() {
+        this.appendValueInput("STRING")
+            .setCheck("String")
+            .appendField("length of");
+        this.setOutput(true, "Number");
+        this.setColour(160);
+        this.setTooltip("Get the length of a string");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['string_length'] = function(block) {
+      var string = Blockly.JavaScript.valueToCode(block, 'STRING', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      return [string + '.length', Blockly.JavaScript.ORDER_MEMBER];
+    };
+
+    Blockly.Blocks['int_to_string'] = {
+      init: function() {
+        this.appendValueInput("NUMBER")
+            .setCheck("Number")
+            .appendField("convert number");
+        this.appendDummyInput()
+            .appendField("to text");
+        this.setOutput(true, "String");
+        this.setColour(160);
+        this.setTooltip("Convert a number to text");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['int_to_string'] = function(block) {
+      var number = Blockly.JavaScript.valueToCode(block, 'NUMBER', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+      return ['String(' + number + ')', Blockly.JavaScript.ORDER_FUNCTION_CALL];
+    };
+
+    Blockly.Blocks['let_variable'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("let")
+            .appendField(new Blockly.FieldTextInput("variableName"), "VAR");
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("=");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a let variable");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['let_variable'] = function(block) {
+      var varName = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
+      return 'let ' + varName + ' = ' + value + ';\n';
+    };
+
+    Blockly.Blocks['const_variable'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("const")
+            .appendField(new Blockly.FieldTextInput("constantName"), "VAR");
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("=");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a constant");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['const_variable'] = function(block) {
+      var varName = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
+      return 'const ' + varName + ' = ' + value + ';\n';
+    };
+
+    Blockly.Blocks['global_var_variable'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("var")
+            .appendField(new Blockly.FieldTextInput("globalVar"), "VAR");
+        this.appendValueInput("VALUE")
+            .setCheck(null)
+            .appendField("=");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip("Declare a global variable");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['global_var_variable'] = function(block) {
+      var varName = block.getFieldValue('VAR');
+      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
+      return 'var ' + varName + ' = ' + value + ';\n';
+    };
+
+    Blockly.Blocks['game_display'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Display Object");
+        this.appendValueInput("ID")
+            .setCheck("String") 
+            .appendField("ID");
+        this.appendValueInput("VISIBLE")
+            .setCheck("Boolean")
+            .appendField("Visible");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Show or hide a game object");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.JavaScript['game_display'] = function(block) {
+      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+      var visible = Blockly.JavaScript.valueToCode(block, 'VISIBLE', Blockly.JavaScript.ORDER_ATOMIC) || 'true';
+      return `game.display(${id}, ${visible});\n`; 
+    };
+
     const translations = {
       pt: {
         runButton: "Executar",
         copyButton: "Copiar Código",
+        openModalButton: "Abrir Modal",
+        modalTitle: "Estrutura do Jogo",
+        runGameButton: "Executar Jogo",
         blocks: {
           logic: "Lógica",
           loops: "Loops",
@@ -313,6 +1036,9 @@
       en: {
         runButton: "Run",
         copyButton: "Copy Code",
+        openModalButton: "Open Modal",
+        modalTitle: "Game Structure",
+        runGameButton: "Run Game",
         blocks: {
           logic: "Logic",
           loops: "Loops",
@@ -321,12 +1047,35 @@
           lists: "Lists",
           color: "Color",
           variables: "Variables",
-          functions: "Functions"
+          functions: "Functions",
+          nandraki: "Nandraki",
+          create_sprite: "Create Sprite",
+          create_obj: "Create Object",
+          create_ui: "Create UI",
+          canvas_start: "Create Canvas",
+          moveTouch: "Move object by touch/mouse input",
+        },
+        toolbox: {
+          createSprite: "Create Sprite",
+          createUI: "Create UI",
+          moveObject: "Move Object",
+          createObject: "Create Object",
+          checkCollision: "Check Collision",
+          defineFunction: "Define Function",
+          setLayer: "Set Layer",
+          setImageFrame: "Set Image Frame",
+          spawnSprite: "Spawn Sprite",
+          applyForce: "Apply Force",
+          displayObject: "Display Object",
+          createHTMLElement: "Create HTML Element"
         }
       },
       es: {
         runButton: "Ejecutar",
         copyButton: "Copiar Código",
+        openModalButton: "Abrir Modal",
+        modalTitle: "Estructura del Juego",
+        runGameButton: "Ejecutar Juego",
         blocks: {
           logic: "Lógica",
           loops: "Bucles",
@@ -352,14 +1101,30 @@
       workspace.toolbox_.refreshSelection();
     }
 
+    function updateBlockTranslations(lang) {
+      const blocks = workspace.getAllBlocks();
+      blocks.forEach(block => {
+        const type = block.type;
+        if (translations[lang].toolbox[type]) {
+          block.setTooltip(translations[lang].toolbox[type]);
+        }
+      });
+    }
+
     function updateLanguage(lang) {
       document.getElementById('runButton').textContent = translations[lang].runButton;
       document.getElementById('copyButton').textContent = translations[lang].copyButton;
+      document.getElementById('openModalButton').textContent = translations[lang].openModalButton;
+      document.querySelector('.modal-content h2').textContent = translations[lang].modalTitle;
+      document.getElementById('runGameButton').textContent = translations[lang].runGameButton;
       updateBlockLabels(lang);
+      updateBlockTranslations(lang);
     }
 
     document.getElementById('languageSelect').addEventListener('change', function() {
-      updateLanguage(this.value);
+      const newLang = this.value;
+      updateLanguage(newLang);
+      workspace.updateToolbox(document.getElementById('toolbox'));
     });
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -390,13 +1155,6 @@
     function updateCode() {
       var code = Blockly.JavaScript.workspaceToCode(workspace);
       codeEditor.setValue(code);
-
-      const gameCode = gameCodeEditor.getValue();
-      const updatedGameCode = gameCode.replace(
-        /\/\/ codigo do bloco aqui/,
-        code
-      );
-      gameCodeEditor.setValue(updatedGameCode);
     }
 
     workspace.addChangeListener(updateCode);
@@ -426,7 +1184,6 @@
     const runGameButton = document.getElementById("runGameButton");
     let gameCodeEditor;
 
-    // Initialize CodeMirror
     document.addEventListener('DOMContentLoaded', function() {
       gameCodeEditor = CodeMirror(document.getElementById("gameCodeEditor"), {
         mode: "htmlmixed",
@@ -440,7 +1197,6 @@
         extraKeys: {"Ctrl-Space": "autocomplete"}
       });
 
-      // Set the initial content of the CodeMirror editor
       const cdnLink = document.getElementById("engineLinkInput").value;
       gameCodeEditor.setValue(`<html>
 <head>
@@ -464,7 +1220,7 @@
 
     openModalButton.onclick = function() {
       modal.style.display = "block";
-      gameCodeEditor.refresh(); // Refresh CodeMirror when the modal is opened
+      gameCodeEditor.refresh();
     }
 
     closeButton.onclick = function() {
@@ -483,543 +1239,12 @@
       gameWindow.document.close();
     }
 
-    // Update the CDN link when it changes
     document.getElementById("engineLinkInput").addEventListener("change", function() {
       const newCdnLink = this.value;
       const currentCode = gameCodeEditor.getValue();
       const updatedCode = currentCode.replace(/<script src=".*"><\/script>/, `<script src="${newCdnLink}"><\/script>`);
       gameCodeEditor.setValue(updatedCode);
     });
-
-    Blockly.Blocks['nandraki_create_sprite'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Criar Sprite");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("LAYERS")
-            .setCheck("Number")
-            .appendField("Camadas");
-        this.appendValueInput("SPRITE1")
-            .setCheck("String")
-            .appendField("Sprite 1");
-        this.appendValueInput("SPRITE2")
-            .setCheck("String")
-            .appendField("Sprite 2");
-        this.appendValueInput("SPRITE3")
-            .setCheck("String")
-            .appendField("Sprite 3");
-        this.appendValueInput("SPRITE4")
-            .setCheck("String")
-            .appendField("Sprite 4");
-        this.appendValueInput("SPRITE5")
-            .setCheck("String")
-            .appendField("Sprite 5");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Largura");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Altura");
-        this.appendValueInput("FRAMES")
-            .setCheck("Number")
-            .appendField("Frames");
-        this.appendValueInput("FPS")
-            .setCheck("Number")
-            .appendField("FPS");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Cria um novo sprite no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_create_sprite'] = function(block) {
-      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_layers = Blockly.JavaScript.valueToCode(block, 'LAYERS', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_sprite1 = Blockly.JavaScript.valueToCode(block, 'SPRITE1', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_sprite2 = Blockly.JavaScript.valueToCode(block, 'SPRITE2', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_sprite3 = Blockly.JavaScript.valueToCode(block, 'SPRITE3', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_sprite4 = Blockly.JavaScript.valueToCode(block, 'SPRITE4', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_sprite5 = Blockly.JavaScript.valueToCode(block, 'SPRITE5', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_fps = Blockly.JavaScript.valueToCode(block, 'FPS', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
-      
-      var code = `Nandraki.create_sprite(${value_id}, ${value_layers}, ${value_sprite1}, ${value_sprite2}, ${value_sprite3}, ${value_sprite4}, ${value_sprite5}, ${value_width}, ${value_height}, ${value_frames}, ${value_fps}, ${value_x}, ${value_y});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['nandraki_constructor'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Construtor Nandraki");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Largura");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Altura");
-        this.appendValueInput("FPS")
-            .setCheck("Number")
-            .appendField("FPS");
-        this.appendValueInput("GRAVITY")
-            .setCheck("Number")
-            .appendField("Gravidade");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Construtor para inicializar o jogo Nandraki");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_constructor'] = function(block) {
-      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_fps = Blockly.JavaScript.valueToCode(block, 'FPS', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_gravity = Blockly.JavaScript.valueToCode(block, 'GRAVITY', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `var game = new Nandraki(${value_width}, ${value_height}, ${value_fps}, ${value_gravity});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['nandraki_create_ui'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Criar UI");
-        this.appendValueInput("NAME")
-            .setCheck("String")
-            .appendField("Nome");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Largura");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Altura");
-        this.appendValueInput("COLOR")
-            .setCheck("String")
-            .appendField("Cor");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Cria um elemento de UI no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_create_ui'] = function(block) {
-      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.create_ui(${value_name}, ${value_x}, ${value_y}, ${value_width}, ${value_height}, ${value_color});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['nandraki_move_obj'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Mover Objeto");
-        this.appendValueInput("NAME")
-            .setCheck("String")
-            .appendField("Nome");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Move um objeto no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_move_obj'] = function(block) {
-      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.move_obj(${value_name}, ${value_x}, ${value_y});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['nandraki_create_obj'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Criar Objeto");
-        this.appendValueInput("NAME")
-            .setCheck("String")
-            .appendField("Nome");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Largura");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Altura");
-        this.appendValueInput("COLOR")
-            .setCheck("String")
-            .appendField("Cor");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Cria um novo objeto no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_create_obj'] = function(block) {
-      var value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.create_obj(${value_name}, ${value_x}, ${value_y}, ${value_width}, ${value_height}, ${value_color});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['nandraki_check_collision_and_id'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Verificar Colisão e ID");
-        this.appendValueInput("OBJ1")
-            .setCheck("String")
-            .appendField("Objeto 1");
-        this.appendValueInput("OBJ2")
-            .setCheck("String")
-            .appendField("Objeto 2");
-        this.setOutput(true, "Boolean");
-        this.setColour(230);
-        this.setTooltip("Verifica colisão entre dois objetos e compara seus IDs");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['nandraki_check_collision_and_id'] = function(block) {
-      var value_obj1 = Blockly.JavaScript.valueToCode(block, 'OBJ1', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_obj2 = Blockly.JavaScript.valueToCode(block, 'OBJ2', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.check_collision_and_id(${value_obj1}, ${value_obj2})`;
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
-
-    Blockly.Blocks['define_function'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Definir função")
-            .appendField(new Blockly.FieldTextInput("nomeDaFuncao"), "FUNC_NAME");
-        this.appendStatementInput("FUNC_BODY")
-            .setCheck(null);
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(290);
-        this.setTooltip("Define uma nova função");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['define_function'] = function(block) {
-      var text_func_name = block.getFieldValue('FUNC_NAME');
-      var statements_func_body = Blockly.JavaScript.statementToCode(block, 'FUNC_BODY');
-      var code = `function ${text_func_name}() {\n${statements_func_body}}\n`;
-      return code;
-    };
-
-    Blockly.Blocks['game_camada'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("game.camada");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("DEPTH")
-            .setCheck("Number")
-            .appendField("Profundidade");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Define a camada de um objeto no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_camada'] = function(block) {
-      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_depth = Blockly.JavaScript.valueToCode(block, 'DEPTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.camada(${value_id}, ${value_depth});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['game_img_frame'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("game.img_frame");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("IMG")
-            .setCheck("String")
-            .appendField("Imagem");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Largura");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Altura");
-        this.appendValueInput("FRAMES")
-            .setCheck("Number")
-            .appendField("Frames");
-        this.appendValueInput("CURRENT_FRAME")
-            .setCheck("Number")
-            .appendField("Frame Atual");
-        this.appendValueInput("START_FRAME")
-            .setCheck("Number")
-            .appendField("Frame Inicial");
-        this.appendValueInput("END_FRAME")
-            .setCheck("Number")
-            .appendField("Frame Final");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Define um frame de imagem para um objeto no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_img_frame'] = function(block) {
-      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_img = Blockly.JavaScript.valueToCode(block, 'IMG', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_current_frame = Blockly.JavaScript.valueToCode(block, 'CURRENT_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_start_frame = Blockly.JavaScript.valueToCode(block, 'START_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_end_frame = Blockly.JavaScript.valueToCode(block, 'END_FRAME', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.img_frame(${value_id}, ${value_img}, ${value_width}, ${value_height}, ${value_frames}, ${value_current_frame}, ${value_start_frame}, ${value_end_frame});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['game_spawn_sprite'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("game.spawn_sprite");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("IMG")
-            .setCheck("String")
-            .appendField("Imagem");
-        this.appendValueInput("LEFT")
-            .setCheck("Number")
-            .appendField("Esquerda");
-        this.appendValueInput("TOP")
-            .setCheck("Number")
-            .appendField("Topo");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Cria um novo sprite no jogo");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_spawn_sprite'] = function(block) {
-      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_img = Blockly.JavaScript.valueToCode(block, 'IMG', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.spawn_sprite(${value_id}, ${value_img}, ${value_left}, ${value_top});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['game_force_obj'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("game.force_obj");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y");
-        this.appendValueInput("ROTATE")
-            .setCheck("Boolean")
-            .appendField("Rotacionar");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Aplica força a um objeto no jogo, com opção de rotação");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_force_obj'] = function(block) {
-      var value_id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC);
-      var value_rotate = Blockly.JavaScript.valueToCode(block, 'ROTATE', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = `game.force_obj(${value_id}, ${value_x}, ${value_y}, ${value_rotate});\n`;
-      return code;
-    };
-
-    Blockly.Blocks['let_variable'] = {
-      init: function() {
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("let")
-            .appendField(new Blockly.FieldTextInput("item"), "VAR");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a local variable using 'let'");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['let_variable'] = function(block) {
-      var variable_name = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
-      var code = 'let ' + variable_name + ' = ' + value + ';\n';
-      return code;
-    };
-
-    Blockly.Blocks['const_variable'] = {
-      init: function() {
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("const")
-            .appendField(new Blockly.FieldTextInput("item"), "VAR");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a constant using 'const'");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['const_variable'] = function(block) {
-      var variable_name = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
-      var code = 'const ' + variable_name + ' = ' + value + ';\n';
-      return code;
-    };
-
-    Blockly.Blocks['global_var_variable'] = {
-      init: function() {
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("var (global)")
-            .appendField(new Blockly.FieldTextInput("item"), "VAR");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a global variable using 'var'");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['global_var_variable'] = function(block) {
-      var variable_name = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || 'null';
-      var code = 'var ' + variable_name + ' = ' + value + ';\n';
-      return code;
-    };
-
-    Blockly.Blocks['console_log'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("console.log");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Log a message to the console");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['console_log'] = function(block) {
-      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = 'console.log(' + value_text + ');\n';
-      return code;
-    };
-
-    Blockly.Blocks['print'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("print");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Print a message");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['print'] = function(block) {
-      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = 'print(' + value_text + ');\n';
-      return code;
-    };
-
-    Blockly.Blocks['alert'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("alert");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Show an alert message");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['alert'] = function(block) {
-      var value_text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC);
-      var code = 'alert(' + value_text + ');\n';
-      return code;
-    };
-
   </script>
 </body>
 </html>
