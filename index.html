@@ -1,1250 +1,3258 @@
-<html><head><base href="https://websim.example.com/">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BlockCode: Sistema de Programação em Blocos com Funções Nandraki</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/blockly.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/blocks.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/9.3.1/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-<style>
+<!DOCTYPE html><html><head><style>
+  :root {
+    --dark-gray: #1a1a2e;    /* Slightly darker base */
+    --mid-gray: #262640;     /* More saturated mid tone */
+    --light-gray: #333355;   /* Richer light tone */
+    --text-color: #ffffff;   
+    --accent-color: #3498db; /* Bright blue */
+    --accent-hover: #2980b9; /* Deeper blue */
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+  }
+
+  * {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+
+  /* Hide webkit scrollbars */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
-  }
-  #engineLink {
-    background-color: #f8f8f8;
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-  }
-  #engineLink a {
-    color: #4CAF50;
-    text-decoration: none;
-    font-weight: bold;
-    margin: 0 10px;
-  }
-  #engineLink a:hover {
-    text-decoration: underline;
-  }
-  #engineLink input {
-    margin-top: 10px;
-    width: 80%;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-  }
-  #blocklyDiv {
-    flex-grow: 1;
-    width: 100%;
-    height: calc(60vh - 40px);
-  }
-  #bottomPanel {
-    height: 40vh;
+    font-family: Arial, sans-serif;
+    background: var(--dark-gray);
+    color: var(--text-color);
     display: flex;
-    border-top: 2px solid #ddd;
+    height: 100vh;
   }
-  #outputDiv, #codeDiv {
-    width: 50%;
-    height: 100%;
-    background-color: #fff;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow-y: auto;
+
+  .toolbar {
+    display: none; /* Hide the old toolbar */
   }
-  #outputDiv {
-    border-right: 1px solid #ddd;
-  }
-  #buttonContainer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+
+  .scene-controls {
+    padding: 16px;
     display: flex;
-    gap: 10px;
-    z-index: 1000;
+    gap: 8px;
+    border-bottom: 1px solid var(--light-gray);
   }
-  #runButton, #copyButton, #openModalButton {
-    padding: 10px 20px;
-    color: white;
+
+  .scene-controls button {
+    flex: 1;
+    background: var(--accent-color);
     border: none;
-    border-radius: 5px;
+    color: var(--text-color);
+    padding: 8px 16px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    border-radius: 4px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  #runButton {
-    background-color: #4CAF50;
+
+  .scene-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   }
-  #copyButton {
-    background-color: #008CBA;
-  }
-  #openModalButton {
-    background-color: #e91e63;
-  }
-  #runButton:hover {
-    background-color: #45a049;
-  }
-  #copyButton:hover {
-    background-color: #007B9A;
-  }
-  #openModalButton:hover {
-    background-color: #d81b60;
-  }
-  #languageSelector {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-  }
-  #languageSelect {
-    padding: 5px;
-    border-radius: 3px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    font-size: 14px;
-  }
-  .CodeMirror {
-    height: 400px;
-    border: 1px solid #ddd;
-    font-family: monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 10px;
-  }
-  .modal {
+
+  .scene-controls button#stopBtn {
     display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
+    background: #e74c3c;
   }
-  .modal-content {
-    background-color: #f8f8f8;
-    margin: 5% auto;
+
+  .scene-controls button#stopBtn:hover {
+    background: #c0392b;
+  }
+
+  .main-container {
+    display: flex;
+    flex: 1;
+  }
+
+  .sidebar {
+    width: 250px;
+    background: var(--mid-gray);
+    padding: 16px;
+    border-right: 1px solid #000;
+  }
+
+  .scene-view {
+    flex: 1;
+    background: #000;
+    position: relative;
+  }
+
+  .tree-view {
+    color: var(--text-color);
+  }
+
+  .tree-item {
+    background: rgba(52, 152, 219, 0.05);
+    border-radius: 6px;
+    margin: 4px 0;
+  }
+
+  .tree-item.main-scene {
+    border: 2px solid var(--accent-color);
+    background: rgba(52, 152, 219, 0.15);
+  }
+
+  .tree-item:hover {
+    background: rgba(52, 152, 219, 0.1);
+    transform: translateX(4px);
+  }
+
+  .tree-item .icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+
+  .folder-icon {
+    color: #3498db;  /* Changed from gold to blue */
+  }
+
+  .file-icon {
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+
+  .project-panel {
+    background: var(--mid-gray);
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 800px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
   }
-  .modal h2 {
-    margin-top: 0;
-    color: #333;
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: linear-gradient(90deg, var(--mid-gray), var(--dark-gray));
+    border-radius: 8px 8px 0 0;
   }
-  #runGameButton {
-    background-color: #4CAF50;
+
+  .project-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent-color);
+  }
+
+  .upload-btn {
+    background: var(--accent-color);
     color: white;
     padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+  }
+
+  .upload-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    background: var(--dark-gray);
+    border-radius: 8px;
+    overflow: auto;
+  }
+
+  .asset-item {
+    text-align: center;
+    padding: 12px;
+    cursor: pointer;
+    background: var(--mid-gray);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--light-gray);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .asset-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-color: var(--accent-color);
+  }
+
+  .file-preview {
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 8px;
+    background: var(--dark-gray);
+    border-radius: 4px;
+    padding: 4px;
+  }
+
+  .file-icon {
+    font-size: 24px;
+    margin: 8px 0;
+    display: block;
+  }
+
+  .asset-item .crud-buttons {
+ 
+    flex-direction: column;
+    margin-top: 8px;
+  }
+
+  .asset-item .crud-buttons button {
+    width: 100%;
+    padding: 6px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
   }
-  #runGameButton:hover {
-    background-color: #45a049;
+
+  .asset-item .crud-buttons button:first-child {
+    background: var(--accent-color);
+    color: white;
   }
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
+
+  .asset-item .crud-buttons button:last-child {
+    background: var(--error-color);
+    color: white;
+  }
+
+  .asset-item .crud-buttons button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+  }
+
+  /* Empty state styling */
+  .assets-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--dark-gray);
+    border-radius: 8px;
+    color: var(--text-color);
+  }
+
+  .assets-empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  .assets-empty-state .title {
+    font-size: 18px;
     font-weight: bold;
-    cursor: pointer;
+    margin-bottom: 8px;
   }
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+
+  .assets-empty-state .subtitle {
+    font-size: 14px;
+    opacity: 0.7;
   }
+
+  .project-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--mid-gray);
+    padding: 16px;
+    border-top: 1px solid #000;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .panel-header button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .panel-header button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .panel-header button:last-of-type::before {
+    content: "📥";
+  }
+
+  .upload-btn {
+    background: var(--accent-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .upload-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    background: var(--dark-gray);
+    border-radius: 8px;
+    overflow: auto;
+  }
+
+  .asset-item {
+    text-align: center;
+    padding: 12px;
+    cursor: pointer;
+    background: var(--mid-gray);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--light-gray);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .asset-item:hover {
+    background: var(--light-gray);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .file-preview {
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 8px;
+    background: var(--dark-gray);
+    border-radius: 4px;
+    padding: 4px;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: var(--mid-gray);
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .form-group input, .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    background: var(--dark-gray);
+    border: 1px solid var(--light-gray);
+    color: var(--text-color);
+  }
+
+  .crud-buttons {
+   
+	text-align: center;
+	margin-left: auto;
+    margin-right: auto 
+    bottom: 0;
+    left: 100px;
+    right: auto;
+    padding: 15px;
+    background: var(--mid-gray);
+    border-top: 1px solid var(--light-gray);
+    display:center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    z-index: 10;
+  }
+
+  .crud-buttons button {
+    min-width: 120px; /* Ensure minimum button width */
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .crud-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  .success-message {
+    color: var(--success-color);
+    padding: 10px;
+    display: none;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px;
+    background: var(--mid-gray);
+    border-bottom: 1px solid var(--light-gray);
+    margin-bottom: 10px;
+  }
+
+  .hierarchy-title {
+    color: #3498db;  /* Changed from gold to blue */
+    margin-bottom: 10px;
+  }
+
+  .scene-title {
+    color: #3498db;  /* Changed from green to blue */
+    padding: 8px;
+    background: rgba(0,0,0,0.3);
+  }
+
+  .project-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #3498db;  /* Keep consistent blue */
+  }
+
+  .section-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .section-header:hover {
+    background: rgba(52, 152, 219, 0.1);
+  }
+
+  .section-header .dropdown-arrow {
+    transition: transform 0.3s ease;
+    margin-right: 4px;
+  }
+
+  .section-header.collapsed .dropdown-arrow {
+    transform: rotate(-90deg);
+  }
+
+  .section-content {
+    transition: all 0.3s ease;
+    overflow: auto;
+    max-height: 1000px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .section-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  .add-hierarchy-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .add-hierarchy-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.1);
+  }
+
+  .tree-item .crud-buttons {
+    position: absolute;
+    right: 4px;
+    display: none;
+    gap: 4px;
+  }
+
+  .tree-item .crud-buttons button {
+    background: transparent;
+    border: none;
+    color: #e74c3c;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tree-item .crud-buttons button:hover {
+    background: rgba(231, 76, 60, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .tree-item .crud-buttons button::before {
+    content: "🗑️";
+    font-size: 14px;
+  }
+
+  .engine-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--accent-color);
+    padding: 16px 16px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .engine-subtitle {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    padding: 0 16px 16px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--light-gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .hierarchy-collapse {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
+  .hierarchy-collapse:hover {
+    background: var(--accent-hover);
+  }
+
+  .code-editor-modal .modal-content {
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a2e;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--mid-gray);
+    border-bottom: 2px solid var(--accent-color);
+  }
+
+  .editor-header h2 {
+    color: var(--text-color);
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .editor-header .editor-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .editor-header button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .editor-header button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .editor-header button#saveCode::before {
+    content: "💾";
+  }
+
+  .editor-header button:last-child::before {
+    content: "✕";
+  }
+
+  .editor-toolbar {
+    background: #1a1a2e;
+    border-bottom: 1px solid #3498db;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .editor-toolbar button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .editor-toolbar button:hover {
+    background: #2980b9;
+  }
+
+  .editor-container {
+    display: flex;
+    height: calc(100% - 100px);
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 0 0 8px 8px;
+    overflow: auto;
+  }
+
+  .line-numbers {
+    padding: 8px 16px 8px 0;
+    background: rgba(52, 152, 219, 0.05);
+    color: #3498db;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid rgba(52, 152, 219, 0.2);
+    min-width: 45px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  #codeEditor {
+    flex: 1;
+    background: #1a1a2e;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    resize: none;
+    outline: none;
+    tab-size: 2;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  /* Syntax highlighting classes */
+  .editor-highlight {
+    color: #d4d4d4;
+  }
+
+  .editor-highlight .keyword { color: #569cd6; }
+  .editor-highlight .string { color: #ce9178; }
+  .editor-highlight .number { color: #b5cea8; }
+  .editor-highlight .comment { color: #6a9955; }
+  .editor-highlight .tag { color: #569cd6; }
+  .editor-highlight .attribute { color: #9cdcfe; }
+  .editor-highlight .function { color: #dcdcaa; }
+  .editor-highlight .built-in { color: #d19a66; }
+  .editor-highlight .selector { color: #c678dd; }
+  .editor-highlight .property { color: #56b6c2; }
+  .editor-highlight .at-rule { color: #d19a66; }
+  .editor-highlight .color { color: #ff6c6b; }
+  .editor-highlight .block { color: #d7afaf; }
+
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #000;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toolbar button {
+      flex: 1;
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .project-panel {
+      height: 200px;
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .toolbar button {
+      padding: 6px 12px;
+      font-size: 14px;
+      min-width: 100px;
+    }
+
+    .modal-content {
+      width: 90%;
+      margin: 50px auto;
+    }
+
+    .assets-grid {
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+  }
+
+  /* Updated styles for hierarchyItemModal */
+  #hierarchyItemModal .modal-content {
+    max-width: 400px;
+    padding: 25px;
+  }
+
+  #hierarchyItemModal .crud-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  /* Console styling */
+  .console-modal .modal-content {
+    background: var(--dark-gray);
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .console-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--mid-gray);
+    border-bottom: 2px solid var(--accent-color);
+    color: var(--text-color);
+  }
+
+  .console-header span {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+  }
+
+  .console-header button {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+  }
+
+  .console-header button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  .console-output {
+    overflow:auto; 
+	width: 100%;
+    height: calc(100% - 150px);
+    background: rgba(0,0,0,0.2);
+    font-family: 'Consolas', monospace;
+    line-height: 1;
+  }
+
+  .console-line {
+    margin: 4px 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    gap: 12px;
+  }
+
+  .console-timestamp {
+    color: var(--accent-color);
+    opacity: 0.7;
+    font-size: 12px;
+  }
+
+  .console-line.console-error {
+    color: #ff6b6b;
+    background: rgba(255,107,107,0.1);
+  }
+
+  .console-line.console-warn {
+    color: #ffd93d;
+    background: rgba(255,217,61,0.1);
+  }
+
+  .console-line.console-info {
+    color: #6c5ce7;
+    background: rgba(108,92,231,0.1);
+  }
+
+  .console-input {
+    padding: 16px;
+    background: var(--mid-gray);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .console-input input {
+    flex: 1;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #50fa7b;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+  }
+
+  .console-input input:focus {
+    outline: none;
+    border-color: #50fa7b;
+    box-shadow: 0 0 0 2px rgba(80,250,123,0.2);
+  }
+
+  .console-input span {
+    color: #50fa7b;
+    font-family: 'Consolas', monospace;
+  }
+
+  .clear-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .clear-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.05);
+  }
+
+  .clear-btn:active {
+    transform: scale(0.95);
+  }
+
+  .dropdown-arrow {
+    transition: transform 0.3s ease;
+  }
+
+  .section-content {
+    transition: max-height 0.3s ease;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .section-content.collapsed {
+    max-height: 0;
+  }
+
+  .crud-buttons button {
+    min-width: 120px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 4px 0;
+  }
+
+  .crud-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  .crud-buttons button[onclick*="exportGame"] {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .crud-buttons button[onclick*="exportGame"]:hover {
+    background: #27ae60;
+  }
+   .editor-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 24px;
+          background: var(--mid-gray);
+          border-bottom: 1px solid var(--accent-color);
+        }
+
+        .editor-header-left {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .editor-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .editor-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          border: none;
+          border-radius: 6px;
+          background: var(--mid-gray);
+          color: var(--text-color);
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .editor-btn:hover {
+          background: var(--light-gray);
+          transform: translateY(-1px);
+        }
+
+        .editor-btn.primary {
+          background: var(--accent-color);
+          color: white;
+        }
+
+        .editor-btn.primary:hover {
+          background: var(--accent-hover);
+        }
+
+        .editor-btn.close {
+          background: transparent;
+          color: var(--text-color);
+        }
+
+        .editor-btn.close:hover {
+          background: rgba(231, 76, 60, 0.2);
+          color: #e74c3c;
+        }
+
+        .editor-main {
+          display: flex;
+          flex: 1;
+          overflow: hidden;
+          background: var(--dark-gray);
+        }
+
+        .editor-gutter {
+          padding: 12px 0;
+          min-width: 60px;
+          background: rgba(0,0,0,0.2);
+          border-right: 1px solid var(--mid-gray);
+          user-select: none;
+        }
+
+        .line-numbers {
+          text-align: right;
+          padding-right: 12px;
+          color: var(--light-gray);
+          font-family: 'Consolas', monospace;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .editor-content {
+          flex: 1;
+          overflow: auto;
+          position: relative;
+        }
+
+        .editor-content textarea {
+          caret-color: var(--accent-color);
+        }
+
+        .editor-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 16px;
+          background: var(--mid-gray);
+          border-top: 1px solid var(--light-gray);
+          font-size: 12px;
+        }
+
+        .editor-status {
+          display: flex;
+          gap: 16px;
+        }
+
+        .editor-hints {
+          display: flex;
+          gap: 16px;
+          color: var(--light-gray);
+        }
+
+        .editor-hints span {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        @media (max-width: 768px) {
+          .editor-hints {
+            display: none;
+          }
+          
+          .editor-actions {
+            gap: 4px;
+          }
+
+          .editor-btn span:last-child {
+            display: none;
+          }
+
+          .editor-btn {
+            padding: 8px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .editor-header {
+            flex-direction: column;
+            gap: 12px;
+          }
+
+          .editor-status {
+            flex-direction: column;
+            gap: 4px;
+          }
+        }
+
+        /* Syntax highlighting improvements */
+        .editor-highlight {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          pointer-events: none;
+          padding: 12px 16px;
+          font-family: 'Consolas', monospace;
+          font-size: 14px;
+          line-height: 1.6;
+          white-space: pre;
+          color: #d4d4d4;
+        }
+
+        .editor-highlight .keyword { color: #569cd6; }
+        .editor-highlight .string { color: #ce9178; }
+        .editor-highlight .number { color: #b5cea8; }
+        .editor-highlight .comment { color: #6a9955; }
+        .editor-highlight .tag { color: #569cd6; }
+        .editor-highlight .attribute { color: #9cdcfe; }
+        .editor-highlight .function { color: #dcdcaa; }
+        .editor-highlight .built-in { color: #4ec9b0; }
+ .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+	.assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+	.asset-item:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      border-color: var(--accent-color);
+    }
+	/* Fundo escuro do modal */
+.modal-mix-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 128, 0.4); /* Azul escuro com transparência */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Conteúdo pequeno do modal */
+.modal-mix {
+    background: #eaf4fc; /* Azul bem claro */
+    border: 2px solid #0056b3; /* Azul escuro */
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%; /* Responsivo em telas menores */
+    max-width: 350px; /* Tamanho fixo em telas maiores */
+    box-shadow: 0 4px 10px rgba(0, 0, 128, 0.2);
+    font-family: Arial, sans-serif;
+    animation: fadeIn 0.3s ease-in-out; /* Animação suave ao abrir */
+}
+
+/* Títulos no modal */
+.modal-mix h2 {
+    color: #003366; /* Azul escuro */
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Labels e selects */
+.modal-mix label {
+    color: #0056b3; /* Azul escuro */
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-mix select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background: #ffffff;
+    color: #333;
+}
+
+/* Botões do modal */
+.modal-mix button {
+    background: #007bff; /* Azul claro */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    width: 48%; /* Botões lado a lado */
+    margin: 5px 1%; /* Margem mínima entre os botões */
+    display: inline-block;
+}
+
+.modal-mix button:hover {
+    background: #0056b3; /* Azul escuro ao passar o mouse */
+}
+
+/* Botão "Fechar" */
+.modal-mix .close-btn {
+    background: #f44336; /* Vermelho para fechar */
+}
+
+.modal-mix .close-btn:hover {
+    background: #c0392b;
+}
+
+/* Responsividade */
+@media (max-width: 500px) {
+    .modal-mix {
+        max-width: 95%; /* O modal ocupa quase toda a largura */
+        padding: 15px;
+    }
+
+    .modal-mix button {
+        width: 100%; /* Botões ocupam a largura total */
+        margin: 5px 0; /* Espaçamento vertical entre os botões */
+    }
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/* Conteúdo do modal (padrão azul para mix e outros) */
+.modal-mix, 
+.modal-content {
+    background: #eaf4fc; /* Azul bem claro */
+    border: 2px solid #0056b3; /* Azul escuro */
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: 0 4px 10px rgba(0, 0, 128, 0.2);
+    font-family: Arial, sans-serif;
+    animation: fadeIn 0.3s ease-in-out; /* Animação suave ao abrir */
+}
+
+/* Cabeçalhos */
+.modal-mix h2,
+.modal-content h2 {
+    color: #003366; /* Azul escuro */
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Labels e selects */
+.modal-mix label,
+.modal-content label {
+    color: #0056b3; /* Azul escuro */
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-mix select,
+.modal-content select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background: #ffffff;
+    color: #333;
+}
+
+/* Botões */
+.modal-mix button,
+.modal-content button {
+    background: #007bff; /* Azul claro */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    width: 48%; /* Botões lado a lado */
+    margin: 5px 1%; /* Margem mínima entre os botões */
+    display: inline-block;
+}
+
+.modal-mix button:hover,
+.modal-content button:hover {
+    background: #0056b3; /* Azul escuro ao passar o mouse */
+}
+
+
+
 </style>
-</head>
-<body>
-  <div id="engineLink">
-    <a href="https://github.com/ronanbastos/Nandraki.js/blob/main/nandraki.js" target="_blank">Nandraki.js Game Engine</a>
-    | 
-    <a href="https://ronanbastos.github.io/Documentation-Nandraki.js/" target="_blank">Documentação</a>
-    <br>
-    <input type="text" id="engineLinkInput" placeholder="Digite o link da engine" value="https://unpkg.com/nandraki@2.5.8/nandraki.js">
+<script src="https://unpkg.com/nandraki@2.5.8/nandraki.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script></head><body>
+  <div class="main-container">
+    <div class="sidebar" style="overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--accent-color) var(--dark-gray); max-height: 100vh;">
+      <div class="engine-title">
+        Nandraki.js 
+      </div>
+	    <div class="engine-subtitle">
+          Game Engine 3.0
+        </div>
+      <div class="scene-controls">
+        <button id="playBtn">▶ Play</button>
+        <button id="stopBtn">⏹ Stop</button>
+        <button id="consoleBtn">🖥 Console</button>
+        <button id="cdnBtn">📦 CDN</button>
+      </div>
+      <div class="section-title hierarchy-title section-header" onclick="toggleSection('hierarchy')">
+        <span class="dropdown-arrow">▼</span>
+        <span>📁 Hierarchy</span>
+		<button id="mixButton" onclick=" event.stopPropagation(); " class="add-hierarchy-btn">Mix</button>
+        <button onclick="openHierarchyModal(); event.stopPropagation();" class="add-hierarchy-btn">+</button>
+		
+        <button class="hierarchy-collapse" onclick="hierarchyManager.toggleHierarchy()">◀</button>
+      </div>
+      <div class="section-content" id="hierarchy-content" style="max-height: calc(100vh - 250px); overflow: auto;">
+        <div class="tree-view">
+</div>
+      </div>
+    </div>
+
+    <div class="scene-view">
+  <canvas id="gameCanvas"></canvas>
+  
+  <div class="project-panel">
+    <div class="panel-header section-header" onclick="toggleSection('assets')">
+      <div class="project-title">
+        <span class="dropdown-arrow">▼</span>
+        <span>🎮 Project Assets</span>
+      </div>
+      <label for="fileUpload" class="upload-btn">
+        Import File
+        <input type="file" id="fileUpload" multiple="" accept=".js,.html,.css,.png,.jpg,.jpeg,.gif,.svg,.nans" style="display:none">
+      </label>
+    </div>
+    <div class="section-content" id="assets-content">
+      <div class="assets-grid" id="assetsGrid" style="max-height: 300px; overflow: auto; text-align: center;">
+  <style>
+    
+
+    
+
+    .asset-item:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .file-preview {
+      width: 100%;
+      height: 80px;
+      object-fit: contain;
+      background: var(--dark-gray);
+      border-radius: 6px;
+      padding: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .asset-item:hover .file-preview {
+      transform: scale(1.05);
+    }
+
+    .file-icon {
+      font-size: 32px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dark-gray);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .asset-name {
+      font-size: 0.9em;
+      font-weight: 500;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 32px;
+    }
+
+    .crud-buttons {
+      display: flex;
+      opacity: 0;
+      transform: translateY(100%);
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px;
+      background: linear-gradient(to top, var(--mid-gray) 80%, transparent);
+      align-items: center;
+    }
+
+    .asset-item:hover .crud-buttons {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .crud-buttons button {
+      width: 90%;
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      margin: 0 auto;
+    }
+
+    .crud-buttons button:first-child {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .crud-buttons button:last-child {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .crud-buttons button:hover {
+      filter: brightness(1.1);
+      transform: scale(1.02);
+    }
+
+    .assets-empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--dark-gray);
+      border-radius: 8px;
+      border: 2px dashed var(--light-gray);
+    }
+
+    .assets-empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @media (max-width: 768px) {
+      .assets-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .assets-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      }
+      
+      .asset-item {
+        min-height: 120px;
+      }
+      
+      .file-preview, .file-icon {
+        height: 60px;
+      }
+    }
+	/* Fundo específico para o modal mix */
+.mix-modal-overlay {
+    background: rgba(0, 0, 255, 0.1); /* Fundo azul-claro */
+}
+
+/* Estilo específico para o conteúdo do modal mix */
+.mix-modal-content {
+    border: 2px solid #007bff; /* Borda azul */
+    background: #f0f8ff; /* Fundo azul claro */
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Títulos no modal mix */
+.mix-modal-content h2 {
+    color: #0056b3;
+}
+
+/* Botões no modal mix */
+.mix-modal-content button {
+    background: #0056b3;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.mix-modal-content button:hover {
+    background: #003d80;
+}
+.Additional{
+
+   background: #0056b3;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+ 
+}
+
+  </style>
+
+  <div class="assets-empty-state">
+    <div class="icon">📥</div>
+    <div class="title">No Assets</div>
+    <div class="subtitle">
+      Import files files here
+    </div>
   </div>
-  <div id="blocklyDiv"></div>
-  <div id="bottomPanel">
-    <div id="outputDiv"></div>
-    <div id="codeDiv"></div>
+</div>
+    </div>
   </div>
-  <div id="buttonContainer">
-    <button id="runButton">Executar</button>
-    <button id="copyButton">Copiar Código</button>
-    <button id="openModalButton">Abrir Modal</button>
-  </div>
-  <div id="languageSelector">
-    <select id="languageSelect">
-      <option value="pt">Português</option>
-      <option value="en">English</option>
-      <option value="es">Español</option>
-    </select>
+</div>
   </div>
 
-  <div id="gameModal" class="modal">
+  <div id="createModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Estrutura do Jogo</h2>
-      <div id="gameCodeEditor"></div>
-      <button id="runGameButton">Executar Jogo</button>
+      <h2>Create New Asset</h2>
+      <form id="createForm">
+        <div class="form-group">
+          <label>Name:</label>
+          <input type="text" id="assetName" required="">
+        </div>
+        <div class="form-group">
+          <label>Type:</label>
+          <input type="text" id="assetType" required="">
+        </div>
+        <div class="form-group">
+          <label>Description:</label>
+          <textarea id="assetDescription"></textarea>
+        </div>
+      	<div class="form-group "> 	
+          <button type="submit "  >Create</button>
+          <button type="button" onclick="closeModal('createModal')">Cancel</button>
+        </div>
+      </form>
+      <div id="createSuccess" class="success-message">Asset created successfully!</div>
     </div>
   </div>
 
-  <xml id="toolbox" style="display: none">
-    <category name="Nandraki" colour="#FF6B6B">
-      <block type="game_print"></block>
-      <block type="create_sprite"></block>
-      <block type="create_obj"></block>
-      <block type="create_ui"></block>
-      <block type="game_coord"></block>
-      <block type="game_colidir"></block>
-      <block type="game_canvas_start"></block>
-      <block type="game_canvas_text"></block>
-      <block type="game_canvas_arc"></block>
-      <block type="game_click"></block>
-      <block type="game_spawn_sprite"></block>
-      <block type="game_start_sound"></block>
-      <block type="game_bd_load"></block>
-      <block type="game_bd_remove"></block>
-      <block type="game_bd_clear"></block>
-      <block type="game_bd_save"></block>
-      <block type="game_move_touch"></block>
-      <block type="console_log"></block>
-      <block type="print"></block>
-      <block type="alert"></block>
-      <block type="join_strings"></block>
-      <block type="compare_variables"></block>
-      <block type="string_length"></block>
-      <block type="int_to_string"></block>
-      <block type="let_variable"></block>
-      <block type="const_variable"></block>
-      <block type="global_var_variable"></block>
-      <block type="game_display"></block>
-    </category>
-    <category name="Lógica" colour="#5C81A6">
-      <block type="controls_if"></block>
-      <block type="logic_compare"></block>
-      <block type="logic_operation"></block>
-      <block type="logic_negate"></block>
-    </category>
-    <category name="Loops" colour="#5C81A6">
-      <block type="controls_repeat_ext">
-        <value name="TIMES">
-          <shadow type="math_number">
-            <field name="NUM">10</field>
-          </shadow>
-        </value>
-      </block>
-      <block type="controls_whileUntil"></block>
-      <block type="controls_for">
-        <value name="FROM">
-          <shadow type="math_number">
-            <field name="NUM">1</field>
-          </shadow>
-        </value>
-        <value name="TO">
-          <shadow type="math_number">
-            <field name="NUM">10</field>
-          </shadow>
-        </value>
-        <value name="BY">
-          <shadow type="math_number">
-            <field name="NUM">1</field>
-          </shadow>
-        </value>
-      </block>
-    </category>
-    <category name="Matemática" colour="#5C68A6">
-      <block type="math_number"></block>
-      <block type="math_arithmetic">
-        <value name="A">
-          <shadow type="math_number">
-            <field name="NUM">1</field>
-          </shadow>
-        </value>
-        <value name="B">
-          <shadow type="math_number">
-            <field name="NUM">1</field>
-          </shadow>
-        </value>
-      </block>
-      <block type="math_single">
-        <value name="NUM">
-          <shadow type="math_number">
-            <field name="NUM">9</field>
-          </shadow>
-        </value>
-      </block>
-    </category>
-    <category name="Texto" colour="#5CA68D">
-      <block type="text"></block>
-      <block type="text_join"></block>
-      <block type="console_log"></block>
-      <block type="print"></block>
-      <block type="alert"></block>
-      <block type="join_strings"></block>
-      <block type="compare_variables"></block>
-      <block type="string_length"></block>
-      <block type="int_to_string"></block>
-    </category>
-    <category name="Variáveis" colour="#A65C81">
-      <block type="variables_set"></block>
-      <block type="variables_get"></block>
-      <block type="let_variable"></block>
-      <block type="const_variable"></block>
-      <block type="global_var_variable"></block>
-    </category>
-    <category name="Funções" colour="#9A5CA6" custom="PROCEDURE"></category>
-  </xml>
 
-  <script>
-    Blockly.Blocks['game_print'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Print Message");
-        this.appendValueInput("MESSAGE")
-            .setCheck("String")
-            .appendField("Message");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Print a message using game.print()");
-        this.setHelpUrl("");
-      }
-    };
+  <div id="hierarchyModal" class="modal">
+    <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+  <h2 style="margin-bottom: 20px; text-align: center;">Create Hierarchy Item</h2>
+  <form id="hierarchyForm" style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+    <div class="form-group" style="width: 100%; max-width: 300px;">
+      <label style="text-align: left; display: block;">Name:</label>
+      <input type="text" id="itemName" required="" style="width: 100%; max-width: 300px; padding: 10px; margin: 5px 0; border: 1px solid var(--accent-color); border-radius: 4px; background: var(--dark-gray); color: var(--text-color); font-size: 14px; box-sizing: border-box; transition: all 0.3s ease;">
+    </div>
+    <div class="form-group" style="width: 100%; max-width: 300px;">
+      <label style="text-align: left; display: block;">Type:</label>
+      <select id="itemType" required="" style="width: 100%; padding: 10px; border: 1px solid var(--accent-color); border-radius: 4px; background: var(--dark-gray); color: var(--text-color);">
+  <option value="js">JavaScript (.js)</option>
+  <option value="html">HTML (.html)</option>
+  <option value="css">CSS (.css)</option>
+  <option value="nans">Nandraki Scene (.nans)</option>
 
-    Blockly.JavaScript['game_print'] = function(block) {
-      var message = Blockly.JavaScript.valueToCode(block, 'MESSAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return `game.print(${message});\n`;
-    };
+     
 
-    Blockly.Blocks['game_coord'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Get Coordinates of");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("Object ID");
-        this.setOutput(true, "Array");
-        this.setColour(230);
-        this.setTooltip("Get the coordinates [x,y] of an object by its ID");
-        this.setHelpUrl("");
-      }
-    };
+</select>
+ <button type="submit">Create</button>
+      <button type="button" onclick="closeModal('hierarchyModal')">Cancel</button>
+    </div>
+    
+  </form>
+  <div id="hierarchySuccess" class="success-message" style="text-align: center;">Item created successfully!</div>
+</div>
+  </div>
 
-    Blockly.JavaScript['game_coord'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var code = `game.coord(${id})`;
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
+  <div id="hierarchyItemModal" class="modal">
+    <div class="modal-content" style="justify:center;">
 
-    Blockly.Blocks['create_sprite'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Create Sprite");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("LAYER")
-            .setCheck("Number")
-            .appendField("Layer");
-        this.appendValueInput("IMAGE")
-            .setCheck("String")
-            .appendField("Image Path");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Width");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Height");
-        this.appendValueInput("FRAMES")
-            .setCheck("Number")
-            .appendField("Frames");
-        this.appendValueInput("SPEED")
-            .setCheck("Number")
-            .appendField("Speed");
-        this.appendValueInput("TOP")
-            .setCheck("Number")
-            .appendField("Top");
-        this.appendValueInput("LEFT")
-            .setCheck("Number")
-            .appendField("Left");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Create a sprite with Nandraki");
-      }
-    };
+      <h2 style="margin-bottom: 20px;">Item Options</h2>
+      <div class="crud-buttons">
+        <button onclick="hierarchyManager.setMainScene()" style="background: var(--accent-color);">
+          <span style="margin-right:5px;">🎮</span>
+          Set as Main Scene
+        </button>
+        <button onclick="hierarchyManager.editItemContent()" style="background: var(--accent-color);">
+          <span style="margin-right: 5px;">📝</span>
+          Edit Content
+        </button>
+        <button onclick="hierarchyManager.exportGame(this.selectedItemId)" style="background: var(--success-color);">
+          <span style="margin-right: 5px;">📤</span>
+          Export Game
+        </button>
+        <button onclick="hierarchyManager.deleteItem(this.selectedItemId)" style="background: #e74c3c;">
+          <span style="margin-right: 5px;">🗑️</span>
+          Delete Item
+        </button>
+        <button onclick="closeModal('hierarchyItemModal')" style="background: var(--mid-gray);">
+          Cancel
+        </button>
+		
+      </div>
+    </div>
+  </div>
+  
+  <div id="cdnModal" class="modal cdn-modal">
 
-    Blockly.Blocks['create_obj'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Create Object");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Width");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Height");
-        this.appendValueInput("TOP")
-            .setCheck("Number")
-            .appendField("Top");
-        this.appendValueInput("LEFT")
-            .setCheck("Number")
-            .appendField("Left");
-        this.appendValueInput("DEBUG")
-            .setCheck("Boolean")
-            .appendField("Debug");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Create an object with Nandraki");
-      }
-    };
+	
 
-    Blockly.Blocks['create_ui'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Create UI");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("TEXT")
-            .setCheck("String")
-            .appendField("Text");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Width");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Height");
-        this.appendValueInput("TOP")
-            .setCheck("Number")
-            .appendField("Top");
-        this.appendValueInput("LEFT")
-            .setCheck("Number")
-            .appendField("Left");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Create a UI element with Nandraki");
-      }
-    };
-
-    Blockly.JavaScript['create_sprite'] = function(block) {
-      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      const layer = Blockly.JavaScript.valueToCode(block, 'LAYER', Blockly.JavaScript.ORDER_ATOMIC) || '1';
-      const image = Blockly.JavaScript.valueToCode(block, 'IMAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '64';
-      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '64';
-      const frames = Blockly.JavaScript.valueToCode(block, 'FRAMES', Blockly.JavaScript.ORDER_ATOMIC) || '1';
-      const speed = Blockly.JavaScript.valueToCode(block, 'SPEED', Blockly.JavaScript.ORDER_ATOMIC) || '1';
-      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-
-      return `Nandraki.create_sprite(${id}, ${layer}, ${image}, null, null, null, null, ${width}, ${height}, ${frames}, ${speed}, ${top}, ${left});\n`;
-    };
-
-    Blockly.JavaScript['create_obj'] = function(block) {
-      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const debug = Blockly.JavaScript.valueToCode(block, 'DEBUG', Blockly.JavaScript.ORDER_ATOMIC) || 'false';
-
-      return `Nandraki.create_obj(${id}, ${width}, ${height}, ${top}, ${left}, ${debug});\n`;
-    };
-
-    Blockly.JavaScript['create_ui'] = function(block) {
-      const id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      const text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      const width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      const left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-
-      return `Nandraki.create_ui(${id}, ${text}, ${width}, ${height}, ${top}, ${left});\n`;
-    };
-
-    Blockly.Blocks['game_colidir'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Check Collision between");
-        this.appendValueInput("ID1")
-            .setCheck("String")
-            .appendField("Object 1 ID");
-        this.appendValueInput("ID2")
-            .setCheck("String")
-            .appendField("Object 2 ID");
-        this.setOutput(true, "Boolean");
-        this.setColour(230);
-        this.setTooltip("Check if two objects are colliding");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_colidir'] = function(block) {
-      var id1 = Blockly.JavaScript.valueToCode(block, 'ID1', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var id2 = Blockly.JavaScript.valueToCode(block, 'ID2', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var code = `game.colidir(${id1}, ${id2})`;
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
-
-    Blockly.Blocks['game_move_touch'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Move by Touch");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("Object ID");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Move an object by touch/mouse input");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_move_touch'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return `game.move_touch(${id});\n`;
-    };
-
-    Blockly.Blocks['game_canvas_start'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Create Canvas");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("WIDTH")
-            .setCheck("Number")
-            .appendField("Width");
-        this.appendValueInput("HEIGHT")
-            .setCheck("Number")
-            .appendField("Height");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Create a canvas with specified dimensions");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_canvas_start'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var width = Blockly.JavaScript.valueToCode(block, 'WIDTH', Blockly.JavaScript.ORDER_ATOMIC) || '800';
-      var height = Blockly.JavaScript.valueToCode(block, 'HEIGHT', Blockly.JavaScript.ORDER_ATOMIC) || '600';
+    <div class="modal-content">
+      <h2>Manage Dependencies</h2>
+      <div class="form-group"> 
+	  	       <button onclick="updateCDN()" style="float: left">Update All </button><button onclick="closeModal('cdnModal')">Cancel</button>
+        
+        <label>Nandraki.js CDN:</label>
+        <input type="text" id="cdnInput" value="https://unpkg.com/nandraki@2.5.8/nandraki.js" style="width:80%;   font-weight: bold; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;">
+      </div>
+      <div class="dependencies-list">
+       
+        <div class="form-group new-dependency-section">
+	
+          <label>New Dependency URL:</label>
+          <input type="text" id="newDependencyInput" placeholder="Enter CDN URL or <script> tag" style=" width:80%;   font-weight: bold; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;">
+          <button onclick="addDependency()" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add New Dependency
+          </button>
+        </div>
+		<div >
+ 
+      </div>
+      </div>
       
-      return `game.canvas_start(${id}, ${width}, ${height});\n`;
-    };
+    </div>
+	  <div>
+	 <h3  class="Additional">Additional Dependencies</h3>
+        <div id="dependenciesList"></div>
+		<br>
+		</div>
+  </div>
 
-    Blockly.Blocks['game_canvas_text'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Draw Canvas Text");
-        this.appendValueInput("TEXT")
-            .setCheck("String")
-            .appendField("Text");
-        this.appendValueInput("FONT")
-            .setCheck("String")
-            .appendField("Font");
-        this.appendValueInput("COLOR")
-            .setCheck("String")
-            .appendField("Color");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X Position");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y Position");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Draw text on the canvas with specified properties");
-        this.setHelpUrl("");
-      }
-    };
+  <div id="dialogModal" class="modal">
+    <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; text-align: center; padding: 20px; border-radius: 12px; background: var(--mid-gray); border: 2px solid var(--accent-color); box-shadow: 0 4px 32px rgba(0,0,0,0.3);">
+  <h2 id="dialogTitle" style="margin-bottom: 15px; color: var(--text-color); font-size: 1.2em;">Confirmation</h2>
+  <p id="dialogMessage" style="margin-bottom: 20px; color: var(--text-color); font-size: 0.9em; line-height: 1.4;"></p>
+  <div class="crud-buttons" style="display: flex; gap: 10px; justify-content: center;">
+    <button id="dialogConfirm" style="background: var(--accent-color); min-width: 80px; padding: 8px 16px; border-radius: 6px; font-size: 0.9em;">Confirm</button>
+    <button onclick="closeModal('dialogModal')" style="background: var(--mid-gray); border: 1px solid var(--light-gray); min-width: 80px; padding: 8px 16px; border-radius: 6px; font-size: 0.9em;">Cancel</button>
+  </div>
+</div>
+  </div>
 
-    Blockly.JavaScript['game_canvas_text'] = function(block) {
-      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var font = Blockly.JavaScript.valueToCode(block, 'FONT', Blockly.JavaScript.ORDER_ATOMIC) || '"12px Arial"';
-      var color = Blockly.JavaScript.valueToCode(block, 'COLOR', Blockly.JavaScript.ORDER_ATOMIC) || '"black"';
-      var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      
-      return `game.canvas_text(${text}, ${font}, ${color}, ${x}, ${y});\n`;
-    };
+  <div id="consoleModal" class="modal console-modal">
+    <div class="modal-content">
+      <div class="console-header">
+        <span>🖥️ Game Engine Console</span>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="console.clear()" class="clear-btn">
+            <span>🧹</span> Clear
+          </button>
+          <button onclick="closeModal('consoleModal')" style="background: none; border: none; color: #fff; cursor: pointer;">✕</button>
+        </div>
+      </div>
+      <div class="console-output" id="consoleOutput"></div>
+      <div class="console-input">
+        <span style="color: #50fa7b;">&gt;</span>
+        <input type="text" id="consoleInput" placeholder=">>>" onkeypress="handleConsoleInput(event)" style="
+          width: calc(100% - 32px);
+          margin: 8px 16px;
+          padding: 8px;
+          font-family: 'Consolas', monospace;
+          font-size: 14px;
+          background: #1d1e22;
+          border: 1px solid #3d3e44;
+          border-radius: 4px;
+          color: #50fa7b;
+          outline: none;
+        ">
+      </div>
+    </div>
+  </div>
 
-    Blockly.Blocks['game_canvas_arc'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Draw Canvas Arc");
-        this.appendValueInput("X")
-            .setCheck("Number")
-            .appendField("X Position");
-        this.appendValueInput("Y")
-            .setCheck("Number")
-            .appendField("Y Position"); 
-        this.appendValueInput("FONT")
-            .setCheck("Number")
-            .appendField("Font/Size");
-        this.appendValueInput("B")
-            .setCheck("Number")
-            .appendField("Begin Angle");
-        this.appendValueInput("P")
-            .setCheck("Number")
-            .appendField("End Angle");
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Draw an arc on the canvas");
-        this.setHelpUrl("");
-      }
-    };
+  <div id="codeEditorModal" class="modal code-editor-modal">
+    <div class="modal-content" style="display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 1400px; background: var(--dark-gray); border: 1px solid var(--accent-color); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+      <div class="editor-header">
+        <div class="editor-header-left">
+          <h2 id="editorFileName" style="display: flex; align-items: center; gap: 12px; margin: 0;">
+            <span class="file-icon">📝</span>
+            <span class="file-name">Edit File</span>
+          </h2>
+        </div>
+        <div class="editor-actions">
+          <button class="editor-btn" onclick="indentCode()" title="Format Code (Ctrl+Shift+F)">
+            <span>⚡</span> Format
+          </button>
+          <button class="editor-btn" onclick="searchInCode()" title="Search (Ctrl+F)">
+            <span>🔍</span> Find
+          </button>
+          <button class="editor-btn" onclick="replaceInCode()" title="Replace (Ctrl+H)" style="display: none;">
+  <span>🔄</span> Replace
+</button>
+          <button id="saveCode" class="editor-btn primary" title="Save (Ctrl+S)">
+            <span>💾</span> Save
+          </button>
+          <button onclick="closeModal('codeEditorModal')" class="editor-btn close" title="Close (Esc)">
+            <span>✕</span>
+          </button>
+        </div>
+      </div>
 
-    Blockly.JavaScript['game_canvas_arc'] = function(block) {
-      var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var font = Blockly.JavaScript.valueToCode(block, 'FONT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var b = Blockly.JavaScript.valueToCode(block, 'B', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var p = Blockly.JavaScript.valueToCode(block, 'P', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      
-      return `game.canvas_arc(${x}, ${y}, ${font}, ${b}, ${p});\n`;
-    };
+      <div class="editor-main">
+        <div class="editor-gutter" style="display: none;">
+  <div class="line-numbers"></div>
+</div>
+        <div class="editor-content">
+          <textarea id="codeEditor" spellcheck="false" placeholder="// Start coding here..." style="width: 100%; height: 100%; color: #fff; border: none; background: transparent; resize: none; outline: none; padding: 12px 16px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.6; tab-size: 2;"></textarea>
+        </div>
+      </div>
 
-    Blockly.Blocks['game_click'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("On Click");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("Object ID");
-        this.appendStatementInput("FUNC")
-            .setCheck(null)
-            .appendField("Do");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Execute code when object is clicked");
-        this.setHelpUrl("");
-      }
-    };
+      <div class="editor-footer">
+        <div class="editor-status">
+          <span class="editor-position">Line: 1, Col: 1</span>
+          <span class="editor-file-info">
+            <span class="editor-language">JavaScript</span>
+            <span class="editor-encoding">UTF-8</span>
+          </span>
+        </div>
+        <div class="editor-hints">
+          <span>Ctrl+S to save</span>
+          <span>Ctrl+F to find</span>
+          <span>Ctrl+H to replace</span>
+          <span>Ctrl+Shift+F to format</span>
+        </div>
+      </div>
 
-    Blockly.JavaScript['game_click'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var func = Blockly.JavaScript.statementToCode(block, 'FUNC') || '';
-      var code = `game.click(${id}, function() {\n${func}});\n`;
-      return code;
-    };
 
-    Blockly.Blocks['game_spawn_sprite'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Spawn Sprite");
-        this.appendValueInput("ID")
-            .setCheck("String")
-            .appendField("ID");
-        this.appendValueInput("IMAGE")
-            .setCheck("String")
-            .appendField("Image Path");
-        this.appendValueInput("LEFT")
-            .setCheck("Number")
-            .appendField("Left Position");
-        this.appendValueInput("TOP")
-            .setCheck("Number")
-            .appendField("Top Position");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Spawn a sprite at specified position");
-        this.setHelpUrl("");
-      }
-    };
+      <script>
+        // Add keyboard shortcuts
+        document.getElementById('codeEditor').addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            document.getElementById('saveCode').click();
+          }
+          else if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            searchInCode();
+          }
+          else if (e.ctrlKey && e.key === 'h') {
+            e.preventDefault();
+            replaceInCode();
+          }
+          else if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+            e.preventDefault();
+            indentCode();
+          }
+        });
 
-    Blockly.JavaScript['game_spawn_sprite'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var image = Blockly.JavaScript.valueToCode(block, 'IMAGE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var left = Blockly.JavaScript.valueToCode(block, 'LEFT', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var top = Blockly.JavaScript.valueToCode(block, 'TOP', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      
-      return `game.spawn_sprite(${id}, ${image}, ${left}, ${top});\n`;
-    };
+        // Update cursor position
+        document.getElementById('codeEditor').addEventListener('input', updateCursorPosition);
+        document.getElementById('codeEditor').addEventListener('click', updateCursorPosition);
+        document.getElementById('codeEditor').addEventListener('keyup', updateCursorPosition);
 
-    Blockly.Blocks['game_start_sound'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Start Sound");
-        this.appendValueInput("SOUND_SRC")
-            .setCheck("String")
-            .appendField("Sound Source");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Start playing a sound from the specified source");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_start_sound'] = function(block) {
-      var soundSrc = Blockly.JavaScript.valueToCode(block, 'SOUND_SRC', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return `game.start_som(${soundSrc});\n`;
-    };
-
-    Blockly.Blocks['game_bd_load'] = {
-      init: function() {
-        this.appendValueInput("VALUE")
-            .setCheck("String")
-            .appendField("Load from Database");
-        this.setOutput(true, null);
-        this.setColour(230);
-        this.setTooltip("Load a value from the database");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.Blocks['game_bd_remove'] = {
-      init: function() {
-        this.appendValueInput("VALUE")
-            .setCheck("String")
-            .appendField("Remove from Database");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Remove a value from the database");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.Blocks['game_bd_clear'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Clear Database");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Clear all data from the database");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.Blocks['game_bd_save'] = {
-      init: function() {
-        this.appendValueInput("KEY")
-            .setCheck("String")
-            .appendField("Save to Database Key");
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("Value");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Save a key-value pair to the database");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_bd_load'] = function(block) {
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var code = `game.bd_load(${value})`;
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
-
-    Blockly.JavaScript['game_bd_remove'] = function(block) {
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return `game.bd_remove(${value});\n`;
-    };
-
-    Blockly.JavaScript['game_bd_clear'] = function(block) {
-      return 'game.bd_clear();\n';
-    };
-
-    Blockly.JavaScript['game_bd_save'] = function(block) {
-      var key = Blockly.JavaScript.valueToCode(block, 'KEY', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return `game.bd_save(${key}, ${value});\n`;
-    };
-
-    Blockly.Blocks['console_log'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("console.log");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Log a message to the console");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['console_log'] = function(block) {
-      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return 'console.log(' + text + ');\n';
-    };
-
-    Blockly.Blocks['print'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("print");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Print a message");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['print'] = function(block) {
-      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return 'console.log(' + text + ');\n';
-    };
-
-    Blockly.Blocks['alert'] = {
-      init: function() {
-        this.appendValueInput("TEXT")
-            .setCheck(null)
-            .appendField("alert");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Show an alert message");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['alert'] = function(block) {
-      var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return 'alert(' + text + ');\n';
-    };
-
-    Blockly.Blocks['join_strings'] = {
-      init: function() {
-        this.appendValueInput("STRING1")
-            .setCheck("String")
-            .appendField("join");
-        this.appendValueInput("STRING2")
-            .setCheck("String")
-            .appendField("and");
-        this.setOutput(true, "String");
-        this.setColour(160);
-        this.setTooltip("Join two strings together");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['join_strings'] = function(block) {
-      var string1 = Blockly.JavaScript.valueToCode(block, 'STRING1', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var string2 = Blockly.JavaScript.valueToCode(block, 'STRING2', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return [string1 + ' + ' + string2, Blockly.JavaScript.ORDER_ADDITION];
-    };
-
-    Blockly.Blocks['compare_variables'] = {
-      init: function() {
-        this.appendValueInput("VAR1")
-            .setCheck(null)
-            .appendField("compare");
-        this.appendValueInput("VAR2")
-            .setCheck(null)
-            .appendField("with");
-        this.setOutput(true, "Boolean");
-        this.setColour(160);
-        this.setTooltip("Compare two variables");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['compare_variables'] = function(block) {
-      var var1 = Blockly.JavaScript.valueToCode(block, 'VAR1', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      var var2 = Blockly.JavaScript.valueToCode(block, 'VAR2', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      return [var1 + ' === ' + var2, Blockly.JavaScript.ORDER_EQUALITY];
-    };
-
-    Blockly.Blocks['string_length'] = {
-      init: function() {
-        this.appendValueInput("STRING")
-            .setCheck("String")
-            .appendField("length of");
-        this.setOutput(true, "Number");
-        this.setColour(160);
-        this.setTooltip("Get the length of a string");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['string_length'] = function(block) {
-      var string = Blockly.JavaScript.valueToCode(block, 'STRING', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      return [string + '.length', Blockly.JavaScript.ORDER_MEMBER];
-    };
-
-    Blockly.Blocks['int_to_string'] = {
-      init: function() {
-        this.appendValueInput("NUMBER")
-            .setCheck("Number")
-            .appendField("convert number");
-        this.appendDummyInput()
-            .appendField("to text");
-        this.setOutput(true, "String");
-        this.setColour(160);
-        this.setTooltip("Convert a number to text");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['int_to_string'] = function(block) {
-      var number = Blockly.JavaScript.valueToCode(block, 'NUMBER', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-      return ['String(' + number + ')', Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    };
-
-    Blockly.Blocks['let_variable'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("let")
-            .appendField(new Blockly.FieldTextInput("variableName"), "VAR");
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("=");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a let variable");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['let_variable'] = function(block) {
-      var varName = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-      return 'let ' + varName + ' = ' + value + ';\n';
-    };
-
-    Blockly.Blocks['const_variable'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("const")
-            .appendField(new Blockly.FieldTextInput("constantName"), "VAR");
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("=");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a constant");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['const_variable'] = function(block) {
-      var varName = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-      return 'const ' + varName + ' = ' + value + ';\n';
-    };
-
-    Blockly.Blocks['global_var_variable'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("var")
-            .appendField(new Blockly.FieldTextInput("globalVar"), "VAR");
-        this.appendValueInput("VALUE")
-            .setCheck(null)
-            .appendField("=");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip("Declare a global variable");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['global_var_variable'] = function(block) {
-      var varName = block.getFieldValue('VAR');
-      var value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-      return 'var ' + varName + ' = ' + value + ';\n';
-    };
-
-    Blockly.Blocks['game_display'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField("Display Object");
-        this.appendValueInput("ID")
-            .setCheck("String") 
-            .appendField("ID");
-        this.appendValueInput("VISIBLE")
-            .setCheck("Boolean")
-            .appendField("Visible");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Show or hide a game object");
-        this.setHelpUrl("");
-      }
-    };
-
-    Blockly.JavaScript['game_display'] = function(block) {
-      var id = Blockly.JavaScript.valueToCode(block, 'ID', Blockly.JavaScript.ORDER_ATOMIC) || '""';
-      var visible = Blockly.JavaScript.valueToCode(block, 'VISIBLE', Blockly.JavaScript.ORDER_ATOMIC) || 'true';
-      return `game.display(${id}, ${visible});\n`; 
-    };
-
-    const translations = {
-      pt: {
-        runButton: "Executar",
-        copyButton: "Copiar Código",
-        openModalButton: "Abrir Modal",
-        modalTitle: "Estrutura do Jogo",
-        runGameButton: "Executar Jogo",
-        blocks: {
-          logic: "Lógica",
-          loops: "Loops",
-          math: "Matemática",
-          text: "Texto",
-          lists: "Listas",
-          color: "Cor",
-          variables: "Variáveis",
-          functions: "Funções"
+        function updateCursorPosition(e) {
+          const editor = e.target;
+          const pos = editor.selectionStart;
+          const content = editor.value;
+          
+          let line = 1;
+          let col = 1;
+          
+          for(let i = 0; i < pos; i++) {
+            if(content[i] === '\n') {
+              line++;
+              col = 1;
+            } else {
+              col++;
+            }
+          }
+          
+          document.querySelector('.editor-position').textContent = 
+            `Line: ${line}, Col: ${col}`;
         }
-      },
-      en: {
-        runButton: "Run",
-        copyButton: "Copy Code",
-        openModalButton: "Open Modal",
-        modalTitle: "Game Structure",
-        runGameButton: "Run Game",
-        blocks: {
-          logic: "Logic",
-          loops: "Loops",
-          math: "Math",
-          text: "Text",
-          lists: "Lists",
-          color: "Color",
-          variables: "Variables",
-          functions: "Functions",
-          nandraki: "Nandraki",
-          create_sprite: "Create Sprite",
-          create_obj: "Create Object",
-          create_ui: "Create UI",
-          canvas_start: "Create Canvas",
-          moveTouch: "Move object by touch/mouse input",
-        },
-        toolbox: {
-          createSprite: "Create Sprite",
-          createUI: "Create UI",
-          moveObject: "Move Object",
-          createObject: "Create Object",
-          checkCollision: "Check Collision",
-          defineFunction: "Define Function",
-          setLayer: "Set Layer",
-          setImageFrame: "Set Image Frame",
-          spawnSprite: "Spawn Sprite",
-          applyForce: "Apply Force",
-          displayObject: "Display Object",
-          createHTMLElement: "Create HTML Element"
-        }
-      },
-      es: {
-        runButton: "Ejecutar",
-        copyButton: "Copiar Código",
-        openModalButton: "Abrir Modal",
-        modalTitle: "Estructura del Juego",
-        runGameButton: "Ejecutar Juego",
-        blocks: {
-          logic: "Lógica",
-          loops: "Bucles",
-          math: "Matemáticas",
-          text: "Texto",
-          lists: "Listas",
-          color: "Color",
-          variables: "Variables",
-          functions: "Funciones"
-        }
-      }
-    };
+      </script>
+    </div>
+  </div>
 
-    function updateBlockLabels(lang) {
-      const categories = workspace.toolbox_.contents_;
-      categories.forEach(category => {
-        const name = category.name_;
-        if (translations[lang].blocks[name.toLowerCase()]) {
-          category.name_ = translations[lang].blocks[name.toLowerCase()];
-          category.toolboxItemDef_.name = category.name_;
-        }
-      });
-      workspace.toolbox_.refreshSelection();
-    }
+<script>
 
-    function updateBlockTranslations(lang) {
-      const blocks = workspace.getAllBlocks();
-      blocks.forEach(block => {
-        const type = block.type;
-        if (translations[lang].toolbox[type]) {
-          block.setTooltip(translations[lang].toolbox[type]);
-        }
-      });
-    }
+document.getElementById("mixButton").addEventListener("click", () => {
+    // Cria o fundo escuro do modal
+    const overlay = document.createElement("div");
+    overlay.classList.add("modal-mix-overlay");
 
-    function updateLanguage(lang) {
-      document.getElementById('runButton').textContent = translations[lang].runButton;
-      document.getElementById('copyButton').textContent = translations[lang].copyButton;
-      document.getElementById('openModalButton').textContent = translations[lang].openModalButton;
-      document.querySelector('.modal-content h2').textContent = translations[lang].modalTitle;
-      document.getElementById('runGameButton').textContent = translations[lang].runGameButton;
-      updateBlockLabels(lang);
-      updateBlockTranslations(lang);
-    }
+    // Cria o conteúdo do modal
+    const modal = document.createElement("div");
+    modal.classList.add("modal-mix");
+    modal.innerHTML = `
+        <h2>Configuração do Mix</h2>
+        <label for="htmlSelect">HTML:</label>
+        <select id="htmlSelect">
+            ${hierarchyManager.items
+                .filter(item => item.type === "html")
+                .map(item => `<option value="${item.name}">${item.name}</option>`)
+                .join("")}
+        </select>
+        <label for="cssSelect">CSS:</label>
+        <select id="cssSelect">
+            ${hierarchyManager.items
+                .filter(item => item.type === "css")
+                .map(item => `<option value="${item.name}">${item.name}</option>`)
+                .join("")}
+        </select>
+        <label for="jsSelect">JS:</label>
+        <select id="jsSelect">
+            ${hierarchyManager.items
+                .filter(item => item.type === "js")
+                .map(item => `<option value="${item.name}">${item.name}</option>`)
+                .join("")}
+        </select>
+        <div style="text-align: center;">
+            <button id="generateMix">Gerar Mix</button>
+            <button id="closeMixModal" class="close-btn">Fechar</button>
+        </div>
+    `;
 
-    document.getElementById('languageSelect').addEventListener('change', function() {
-      const newLang = this.value;
-      updateLanguage(newLang);
-      workspace.updateToolbox(document.getElementById('toolbox'));
+    // Adiciona o modal ao fundo
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Fecha o modal
+    document.getElementById("closeMixModal").addEventListener("click", () => {
+        document.body.removeChild(overlay);
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      updateLanguage('pt');
+    // Gera o mix ao clicar no botão
+    document.getElementById("generateMix").addEventListener("click", () => {
+        const htmlName = document.getElementById("htmlSelect").value;
+        const cssName = document.getElementById("cssSelect").value;
+        const jsName = document.getElementById("jsSelect").value;
+
+        const htmlItem = hierarchyManager.findItemInHierarchy(htmlName);
+        const cssItem = hierarchyManager.findItemInHierarchy(cssName);
+        const jsItem = hierarchyManager.findItemInHierarchy(jsName);
+
+        const Html = `
+          <html>
+            <head>
+              <style>
+                ${cssItem.content}
+              </style>
+              <script>${jsItem.content}<\/script>
+            </head>
+            <body>
+              ${htmlItem.content}
+            </body>
+          </html>
+        `;
+
+        // Gera o download
+        const blob = new Blob([Html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "mix.html";
+        modal.innerHTML = `<p>Mix gerado com sucesso!</p>`;
+        modal.appendChild(a);
+        a.textContent = "Baixar Mix";
+        a.click();
+
+        // Fecha o modal após o download
+        setTimeout(() => {
+            document.body.removeChild(overlay);
+        }, 1000);
+    });
+});
+
+
+
+
+class DependencyManager {
+  constructor() {
+    this.dependencies = [];
+    this.loadDependencies();
+  }
+
+  loadDependencies() {
+    const saved = localStorage.getItem('dependencies');
+    this.dependencies = saved ? JSON.parse(saved) : [];
+    this.renderDependencies();
+  }
+
+  saveDependencies() {
+    localStorage.setItem('dependencies', JSON.stringify(this.dependencies));
+  }
+
+  addDependency(url, integrity = null, crossorigin = null) {
+    if (!url) return;
+
+    const newDependency = {
+      id: Date.now(),
+      url: url,
+      integrity: integrity,
+      crossorigin: crossorigin
+    };
+
+    this.dependencies.push(newDependency);
+    this.saveDependencies();
+    this.renderDependencies();
+
+    const script = document.createElement('script');
+    script.src = url;
+    if (integrity) script.integrity = integrity;
+    if (crossorigin) script.crossorigin = crossorigin;
+    document.head.appendChild(script);
+  }
+
+  renderDependencies() {
+    const container = document.getElementById('dependenciesList');
+    if (!container) return;
+
+    container.innerHTML = this.dependencies.map(dep => `
+      <div class="dependency-item" >
+        <div style="flex: 1;">
+          <input type="text" value="${dep.url}" readonly>
+          ${dep.integrity ? `<input type="text" value="${dep.integrity}" readonly style="margin-top: 4px; font-size: 12px;">` : ''}
+        </div>
+        <button onclick="window.dependencyManager.removeDependency(${dep.id})" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 10px 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-top: 10px;">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  removeDependency(id) {
+    this.dependencies = this.dependencies.filter(dep => dep.id !== id);
+    this.saveDependencies();
+    this.renderDependencies();
+  }
+}
+
+class GameEngine {
+  constructor() {
+    this.canvas = document.getElementById('gameCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.isPlaying = false;
+    this.mainSceneContent = null;
+
+    this.initializeControls();
+    this.resizeCanvas();
+    this.setupConsoleInterceptor();
+    window.addEventListener('resize', () => this.resizeCanvas());
+  }
+
+  setupConsoleInterceptor() {
+    const originalConsole = {
+      log: console.log,
+      info: console.info, 
+      warn: console.warn,
+      error: console.error,
+      debug: console.debug,
+      clear: console.clear
+    };
+	
+	const arquivoBuild={
+	html:"",
+	js:"",
+	css:""
+	};
+	
+    ['log', 'info', 'warn', 'error', 'debug', 'clear'].forEach(method => {
+      console[method] = (...args) => {
+        originalConsole[method].apply(console, args);
+        
+	
+		
+        if (method === 'clear') {
+          const consoleOutput = document.getElementById('consoleOutput');
+          if (consoleOutput) {
+            consoleOutput.innerHTML = '';
+           
+          }
+          return;
+        }
+		
+		
+		
+        this.logToConsole(method, args.map(arg => {
+          if (typeof arg === 'object') {
+            return JSON.stringify(arg, null, 2);
+          }
+          return String(arg);
+        }).join(' '));
+      };
+    });	
+	
+    window.addEventListener('error', (event) => {
+      this.logToConsole('error', `${event.message} at ${event.filename}:${event.lineno}:${event.colno}`);
     });
 
-    var workspace = Blockly.inject('blocklyDiv', {
-      toolbox: document.getElementById('toolbox'),
-      scrollbars: true,
-      trashcan: true,
-      zoom: {
-        controls: true,
-        wheel: true,
-        startScale: 1.0,
-        maxScale: 3,
-        minScale: 0.3,
-        scaleSpeed: 1.2
-      },
+    window.addEventListener('unhandledrejection', (event) => {
+      this.logToConsole('error', `Unhandled Promise Rejection: ${event.reason}`);
     });
+	
+	//Função build no console 
+	
+    console.build = (itemName) => {
+        
+        if (itemName === "new html") {
+		     const cdnUrl = document.querySelector('script[src*="nandraki"]').src;
+			 const Html = `
+              <html>
+                <head>
+                  <style>
+				  
+                   ${arquivoBuild.css}
+				   
+                  </style>
+                  <script src="${cdnUrl}"><\/script>
+                </head>
+                <body>
+				
+				 ${arquivoBuild.html}
+				 
+                  <script>
+                        ${arquivoBuild.js}
+                  <\/script>
+                </body>
+              </html>
+            `;
+			const newItem = {
+				id: `new-${Date.now()}`,
+				name: `arquivo.html`,
+				type: "html",
+				content: Html,
+				children: []
+			};
 
-    var outputDiv = document.getElementById('outputDiv');
-    var codeEditor = CodeMirror(document.getElementById('codeDiv'), {
-      mode: 'javascript',
-      lineNumbers: true,
-      theme: 'default'
+			  // Função para baixar o arquivo HTML
+		const blob = new Blob([Html], { type: "text/html" }); 
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a"); 
+		a.href = url; 
+		a.download = "arquivo.html"; // Define o nome do arquivo para download
+		document.body.appendChild(a); // Adiciona o link ao DOM (necessário em alguns navegadores)
+		a.click(); // Aciona o clique para iniciar o download
+		document.body.removeChild(a); // Remove o link após o download
+		URL.revokeObjectURL(url); // Revoga a URL temporária
+			console.info("export sucesso!");
+			return
+		
+
+
+
+		
+		}else  if (itemName != "") {
+		    
+			const item = hierarchyManager.findItemInHierarchy(itemName);
+			if (!item) {
+					console.error(`Item "${itemName}" não encontrado na hierarquia.`);
+					return;
+			
+			}
+			
+			if (['html', 'css', 'js'].includes(item.type)) {
+				arquivoBuild[item.type] = item.content;
+				console.info(`ArquivoBuild.${item.type} foi configurado com sucesso!`);
+			} else {
+				console.error(`Tipo de item "${item.type}" não suportado.`);
+			}
+						   
+			
+        }else{
+		    
+			console.info("item vazio!");
+			
+		}
+		
+		
+	}
+	
+	console.arquivo = () => {
+		
+			console.info(arquivoBuild);   
+	}
+	
+	
+  }
+
+  initializeControls() {
+    const playBtn = document.getElementById('playBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    
+    playBtn.addEventListener('click', () => {
+      this.play();
     });
+    
+    stopBtn.addEventListener('click', () => {
+      this.stop();
+    });
+    
+    document.getElementById('consoleBtn').addEventListener('click', () => this.toggleConsole());
+    document.getElementById('cdnBtn').addEventListener('click', () => openCdnModal());
+  }
 
-    function updateCode() {
-      var code = Blockly.JavaScript.workspaceToCode(workspace);
-      codeEditor.setValue(code);
+  resizeCanvas() {
+    const container = this.canvas.parentElement;
+    this.canvas.width = container.clientWidth;
+    this.canvas.height = container.clientHeight - 100;
+  }
+
+  play() {
+    if (!this.isPlaying) {
+      this.isPlaying = true;
+      document.getElementById('playBtn').style.display = 'none'; 
+      document.getElementById('stopBtn').style.display = 'inline-flex';
+
+      if (window.hierarchyManager.mainSceneId) {
+        const mainScene = window.hierarchyManager.findItem(
+          window.hierarchyManager.mainSceneId, 
+          window.hierarchyManager.items
+        );
+
+        if (mainScene && mainScene.content) {
+          const container = this.canvas.parentElement;
+          container.innerHTML = '';
+
+          if (mainScene.name.toLowerCase().endsWith('.nans')) {
+            // Create iframe for NANS execution with proper HTML structure
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%'; 
+            iframe.style.border = 'none';
+            container.appendChild(iframe);
+
+            // Get current CDN URL
+            const cdnUrl = document.querySelector('script[src*="nandraki"]').src;
+
+            // Create proper HTML structure for NANS with the requested pattern
+            const nansHtml = `
+              <html>
+                <head>
+                  <style>
+                    body {
+                      background-color: white;
+                    }
+                  </style>
+                  <script src="${cdnUrl}"><\/script>
+                </head>
+                <body>
+                  <script>
+                    myjogo = {
+                      start: function() {
+                        ${mainScene.content}
+                      },
+                    };
+
+                    fps = 60;
+                    game.update(myjogo.start, fps);
+                  <\/script>
+                </body>
+              </html>
+            `;
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(nansHtml);
+            iframe.contentWindow.document.close();
+
+            console.log('Executing NANS scene:', mainScene.name);
+
+          } else {
+            // Handle regular HTML scenes as before
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            container.appendChild(iframe);
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(mainScene.content);
+            iframe.contentWindow.document.close();
+          }
+        } else {
+          console.warn('No content found for main scene');
+		  alert("No content found for main scene")
+        }
+      } else {
+        console.warn('No main scene selected');
+		alert("No main scene selected")
+      }
     }
+  }
 
-    workspace.addChangeListener(updateCode);
+  stop() {
+    if (this.isPlaying) {
+      this.isPlaying = false;
+      document.getElementById('playBtn').style.display = 'inline-flex';
+      document.getElementById('stopBtn').style.display = 'none';
 
-    document.getElementById('runButton').addEventListener('click', function() {
-      var code = codeEditor.getValue();
+      const container = document.querySelector('.scene-view');
+      if (container) {
+        // Clear the container
+        container.innerHTML = '';
+        
+        // Recreate canvas
+        const canvas = document.createElement('canvas');
+        canvas.id = 'gameCanvas';
+        container.appendChild(canvas);
+        this.canvas = canvas;
+        this.ctx = this.canvas.getContext('2d');
+        this.resizeCanvas();
+
+        // Recreate and restore project panel
+        const projectPanel = document.createElement('div');
+        projectPanel.className = 'project-panel';
+        projectPanel.innerHTML = `
+          <div class="panel-header section-header" onclick="toggleSection('assets')">
+            <div class="project-title">
+              <span class="dropdown-arrow">▼</span>
+              <span>🎮 Project Assets</span>
+            </div>
+            <label for="fileUpload" class="upload-btn">
+              Import File
+              <input type="file" id="fileUpload" multiple accept=".js,.html,.css,.png,.jpg,.jpeg,.gif,.svg,.nans" style="display:none">
+            </label>
+          </div>
+          <div class="section-content" id="assets-content">
+            <div class="assets-grid" id="assetsGrid"></div>
+          </div>
+        `;
+        container.appendChild(projectPanel);
+
+        // Restore file upload event listener
+        document.getElementById('fileUpload').addEventListener('change', (e) => {
+          window.assetManager.handleFileUpload(e.target.files);
+        });
+
+        // Re-render assets
+        window.assetManager.renderAssets();
+      }
+
+      console.log('Game Stopped');
+    }
+  }
+
+  toggleConsole() {
+    const consoleModal = document.getElementById('consoleModal');
+    const consoleOutput = document.getElementById('consoleOutput');
+
+    consoleOutput.innerHTML = '';
+
+    consoleModal.style.display = 'block';
+
+    console.info('Console initialized. Type JavaScript code below to execute.');
+  }
+
+  logToConsole(type, message) {
+    const consoleOutput = document.getElementById('consoleOutput');
+    if (!consoleOutput) return;
+
+    const line = document.createElement('div');
+    line.className = `console-line console-${type}`;
+
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    let formattedMessage = message;
+    if (typeof message === 'object') {
       try {
-        outputDiv.innerHTML = '';
-        eval(code);
-      } catch (e) {
-        outputDiv.innerHTML = 'Erro: ' + e;
-      }
-    });
-
-    document.getElementById('copyButton').addEventListener('click', function() {
-      var code = codeEditor.getValue();
-      navigator.clipboard.writeText(code).then(function() {
-        alert('Código copiado para a área de transferência!');
-      }, function(err) {
-        console.error('Erro ao copiar código: ', err);
-      });
-    });
-
-    const modal = document.getElementById("gameModal");
-    const openModalButton = document.getElementById("openModalButton");
-    const closeButton = document.getElementsByClassName("close")[0];
-    const runGameButton = document.getElementById("runGameButton");
-    let gameCodeEditor;
-
-    document.addEventListener('DOMContentLoaded', function() {
-      gameCodeEditor = CodeMirror(document.getElementById("gameCodeEditor"), {
-        mode: "htmlmixed",
-        theme: "default",
-        lineNumbers: true,
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        indentUnit: 2,
-        tabSize: 2,
-        lineWrapping: true,
-        extraKeys: {"Ctrl-Space": "autocomplete"}
-      });
-
-      const cdnLink = document.getElementById("engineLinkInput").value;
-      gameCodeEditor.setValue(`<html>
-<head>
-  <script src="${cdnLink}"><\/script>
-</head>
-<body>
-  <script>
-    Nandraki.create_ui("text_id","[hello world]")
-    myjogo = {
-      start : function(){
-        // codigo do bloco aqui
-      },	
-    }
-
-    fps=60;	
-    game.update(myjogo.start,fps);  
-  <\/script>
-</body>
-</html>`);
-    });
-
-    openModalButton.onclick = function() {
-      modal.style.display = "block";
-      gameCodeEditor.refresh();
-    }
-
-    closeButton.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+        formattedMessage = JSON.stringify(message, null, 2);
+      } catch(e) {
+        formattedMessage = message.toString();
       }
     }
 
-    runGameButton.onclick = function() {
-      const gameWindow = window.open("", "Game Window", "width=800,height=600");
-      gameWindow.document.write(gameCodeEditor.getValue());
-      gameWindow.document.close();
+    line.innerHTML = `
+      <span class="console-timestamp">${timestamp}</span>
+      <span class="console-content">${formattedMessage}</span>
+    `;
+
+    consoleOutput.appendChild(line);
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+  }
+}
+
+class AssetManager {
+  constructor() {
+    this.assets = [];
+    this.loadAssets();
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    document.getElementById('fileUpload').addEventListener('change', (e) => {
+      this.handleFileUpload(e.target.files);
+    });
+  }
+
+  async handleFileUpload(files) {
+    for (let file of files) {
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const newAsset = {
+            id: Date.now(),
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            content: e.target.result,
+            dateAdded: new Date().toISOString()
+          };
+
+          this.assets.push(newAsset);
+          this.saveAssets();
+          this.renderAssets();
+
+          window.hierarchyManager.addFileToHierarchy(newAsset);
+        };
+
+        if (file.type.includes('image')) {
+          reader.readAsDataURL(file);
+        } else {
+          reader.readAsText(file);
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        showDialog(
+          'Upload Error',
+          `Error uploading file: ${file.name}`,
+          () => {}  // No action needed on confirm
+        );
+      }
+    }
+  }
+
+  loadAssets() {
+    const savedAssets = localStorage.getItem('gameAssets');
+    this.assets = savedAssets ? JSON.parse(savedAssets) : [];
+    this.renderAssets();
+  }
+
+  renderAssets() {
+    const grid = document.getElementById('assetsGrid');
+
+    if (!this.assets.length) {
+      grid.innerHTML = `
+        <div class="assets-empty-state">
+          <div class="icon">📁</div>
+          <div class="title">No Assets</div>
+          <div class="subtitle">
+            Import files using the button above or drag and drop files here
+          </div>
+        </div>
+      `;
+      return;
     }
 
-    document.getElementById("engineLinkInput").addEventListener("change", function() {
-      const newCdnLink = this.value;
-      const currentCode = gameCodeEditor.getValue();
-      const updatedCode = currentCode.replace(/<script src=".*"><\/script>/, `<script src="${newCdnLink}"><\/script>`);
-      gameCodeEditor.setValue(updatedCode);
+    grid.innerHTML = this.assets.map(asset => `
+      <div class="asset-item" draggable="true" data-id="${asset.id}">
+        <div class="asset-name">${asset.name}</div>
+        <div class="crud-buttons">
+          <button onclick="assetManager.sendToHierarchy(${asset.id})">
+            <span>📁</span> Add to Hierarchy
+          </button>
+          <button onclick="assetManager.deleteAsset(${asset.id})">
+            <span>🗑️</span> Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  getFileIcon(type) {
+    const iconMap = {
+      'js': '📜',
+      'html': '🌐',
+      'css': '🎨',
+      'nans': 'ꙮ',
+      'image':'🖼️',
+      'default': '🧬'
+    };
+    
+    const fileType = type.split('/')[1] || type;
+    return iconMap[fileType] || iconMap.default;
+  }
+
+  sendToHierarchy(id) {
+    const asset = this.assets.find(a => a.id === id);
+    if (asset) {
+      window.hierarchyManager.addFileToHierarchy(asset);
+      console.log('Asset sent to hierarchy:', asset.name);
+    }
+  }
+
+  deleteAsset(id) {
+    showDialog(
+      'Confirm Delete', 
+      'Are you sure you want to delete this asset?',
+      () => {
+        this.assets = this.assets.filter(asset => asset.id !== id);
+        this.saveAssets();
+        this.renderAssets();
+      }
+    );
+  }
+
+  saveAssets() {
+    localStorage.setItem('gameAssets', JSON.stringify(this.assets));
+  }
+}
+
+class HierarchyManager {
+  constructor() {
+    this.items = [];
+    this.selectedItemId = null;
+    this.mainSceneId = null;
+    this.loadHierarchy();
+    this.setupEventListeners();
+  }
+
+  loadHierarchy() {
+    const saved = localStorage.getItem('hierarchy');
+    this.items = saved ? JSON.parse(saved) : [];
+    this.renderHierarchy();
+  }
+ // Busca um item por nome ou ID
+    findItemInHierarchy(identifier) {
+        if (typeof identifier === 'string') {
+            return this.items.find(item => item.name === identifier);
+        }
+        if (typeof identifier === 'number') {
+            return this.items.find(item => item.id === identifier);
+        }
+        console.error('Invalid identifier type. Use a string (name) or number (ID).');
+        return null;
+    }
+
+    // Busca um item recursivamente em hierarquias aninhadas
+    findItemRecursively(identifier, items = this.items) {
+        for (const item of items) {
+            if (typeof identifier === 'string' && item.name === identifier) {
+                return item;
+            }
+            if (typeof identifier === 'number' && item.id === identifier) {
+                return item;
+            }
+
+            if (item.children) {
+                const found = this.findItemRecursively(identifier, item.children);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+  setupEventListeners() {
+    document.getElementById('hierarchyForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.createItem();
     });
-  </script>
-</body>
-</html>
+
+    const treeView = document.querySelector('.tree-view');
+    treeView.addEventListener('dragstart', this.handleDragStart.bind(this));
+    treeView.addEventListener('dragover', this.handleDragOver.bind(this));
+    treeView.addEventListener('drop', this.handleDrop.bind(this));
+  }
+
+  showItemModal(id) {
+    this.selectedItemId = id;
+    const modal = document.getElementById('hierarchyItemModal');
+    const item = this.findItem(id, this.items);
+  
+   
+
+    // Update modal content with new layout and check for both .html and .nans files
+    modal.querySelector('.modal-content').innerHTML = `
+      <h2 style="margin-bottom: 20px;">Item Options</h2>
+      <div class="crud-buttons">
+        ${!item.name.toLowerCase().endsWith('.html') && !item.name.toLowerCase().endsWith('.nans') ? ''  :
+          `<button onclick="hierarchyManager.setMainScene()" 
+          style="background: var(--accent-color);">
+            <span style="margin-right: 6px;">🎮</span>
+            Set as Main Scene
+          </button>`
+        }
+        <button onclick="hierarchyManager.editItemContent()" 
+         style="background: var(--accent-color);">
+          <span style="margin-right: 6px;">📝</span>
+          Edit Content
+        </button>
+        <button onclick="hierarchyManager.exportGame(${id})"
+         style="background: var(--success-color);">
+          <span style="margin-right: 6px;">📤</span>
+          Export Game
+        </button>
+        <button onclick="hierarchyManager.deleteItem(${id})"
+         style="background: #e74c3c;">
+          <span style="margin-right: 6px;">🗑️</span>
+          Delete Item
+        </button>
+        <button onclick="closeModal('hierarchyItemModal')"
+         style="background: var(--mid-gray);">
+          Cancel
+        </button>
+      </div>
+    `;
+
+    modal.style.display = 'block';
+  }
+  setMainScene() {
+    const item = this.findItem(this.selectedItemId, this.items);
+    if (item) {
+      // Check if file is HTML or NANS
+      if (!item.name.toLowerCase().endsWith('.html') && !item.name.toLowerCase().endsWith('.nans')) {
+        console.warn('Only HTML and NANS files can be set as main scene');
+        return;
+      }
+
+      // Store the main scene ID
+      this.mainSceneId = item.id;
+
+      // Re-render hierarchy to update UI
+      this.renderHierarchy();
+
+      // Update scene title if it exists
+      const sceneTitle = document.querySelector('.scene-title');
+      if (sceneTitle) {
+        sceneTitle.textContent = `Scene: ${item.name}`;
+      }
+
+      closeModal('hierarchyItemModal');
+    }
+  }
+
+  exportGame(id) {
+    const item = this.findItem(id, this.items);
+    if (!item) return;
+
+    // Create file content based on type
+    let content = item.content;
+    let filename = item.name;
+
+    // If it's a NANS file, wrap it in the standard HTML template
+    if (item.name.toLowerCase().endsWith('.nans')) {
+      const cdnUrl = document.querySelector('script[src*="nandraki"]').src;
+      content = `
+<html>
+  <head>
+    <style>
+      body {
+        background-color: white;
+      }
+    </style>
+    <script src="${cdnUrl}"><\/script>
+  </head>
+  <body>
+    <script>
+      myjogo = {
+        start: function() {
+          ${item.content}
+        },
+      };
+
+      fps = 60;
+      game.update(myjogo.start, fps);
+    <\/script>
+  </body>
+</html>`;
+      filename = filename.replace('.nans', '.html');
+    }
+
+    // Create and trigger download
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  createItem() {
+    const name = document.getElementById('itemName').value;
+    const type = document.getElementById('itemType').value;
+
+    const newItem = {
+      id: Date.now(),
+      name: name.endsWith('.' + type) ? name : name + '.' + type,
+      type,
+      children: []
+    };
+
+    this.items.push(newItem);
+    this.saveHierarchy();
+    this.renderHierarchy();
+
+    const successMsg = document.getElementById('hierarchySuccess');
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+      closeModal('hierarchyModal');
+    }, 1500);
+  }
+
+  addFileToHierarchy(asset) {
+    const fileExt = asset.name.split('.').pop().toLowerCase();
+    const newItem = {
+      id: asset.id,
+      name: asset.name,
+      type: fileExt,
+      content: asset.content,
+      children: []
+    };
+
+    this.items.push(newItem);
+    this.saveHierarchy();
+    this.renderHierarchy();
+  }
+
+  deleteItem(id) {
+    showDialog(
+      'Confirm Delete',
+      'Are you sure you want to delete this item?',
+      () => {
+        this.items = this.removeItem(id, this.items);
+        this.saveHierarchy();
+        this.renderHierarchy();
+      }
+    );
+  }
+
+editItemContent() {
+    const item = this.findItem(this.selectedItemId, this.items);
+    if (item) {
+      const editor = document.getElementById('codeEditor');
+      const fileName = document.getElementById('editorFileName');
+      
+      fileName.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">📝</span>
+          <span>Editing: ${item.name}</span>
+        </div>
+      `;
+      
+      // Update the save and close buttons
+      document.querySelector('.editor-actions').innerHTML = `
+        <button id="saveCode">Save Changes</button>
+        <button onclick="closeModal('codeEditorModal')">Close Editor</button>
+      `;
+      
+      editor.value = item.content || '';
+      
+      // Apply syntax highlighting based on file type
+      this.applySyntaxHighlighting(item.type);
+      
+      // Update line numbers
+      this.updateLineNumbers();
+      
+      // Setup save handler
+      document.getElementById('saveCode').onclick = () => this.saveItemContent(item.id, editor.value);
+      
+      document.getElementById('codeEditorModal').style.display = 'block';
+      
+      // Add editor event listeners
+      editor.addEventListener('input', () => {
+        this.updateLineNumbers();
+        this.applySyntaxHighlighting(item.type);
+      });
+      
+      editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          editor.value = editor.value.substring(0, start) + '  ' + editor.value.substring(end);
+          editor.selectionStart = editor.selectionEnd = start + 2;
+        }
+      });
+
+      // Set initial cursor position
+      editor.focus();
+      editor.selectionStart = 0;
+      editor.selectionEnd = 0;
+    }
+  }
+
+  saveItemContent(id, newContent) {
+    const item = this.findItem(id, this.items);
+    if (item) {
+      item.content = newContent;
+      this.saveHierarchy();
+      console.log('Content saved for:', item.name);
+      
+      // Show success message
+      const fileName = document.getElementById('editorFileName');
+      const originalText = fileName.innerHTML;
+      fileName.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; color: #4CAF50;">
+          <span style="font-size: 24px;">✓</span>
+          <span>Changes saved!</span>
+        </div>
+      `;
+      
+      // Reset back to original text after 2 seconds
+      setTimeout(() => {
+        fileName.innerHTML = originalText;
+      }, 2000);
+      
+      closeModal('codeEditorModal');
+    }
+  }
+
+  applySyntaxHighlighting(fileType) {
+    const editor = document.getElementById('codeEditor');
+    const content = editor.value;
+    let highlighted = content;
+
+    switch(fileType) {
+      case 'js':
+        highlighted = this.highlightJS(content);
+        break;
+      case 'html':
+        highlighted = this.highlightHTML(content);
+        break;
+      case 'css':
+        highlighted = this.highlightCSS(content);
+        break;
+      case 'nans':
+        highlighted = this.highlightNANS(content);
+        break;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'editor-highlight';
+    wrapper.innerHTML = highlighted;
+    
+    // Preserve cursor position
+    const cursorPos = editor.selectionStart;
+    editor.value = content;
+    editor.selectionStart = cursorPos;
+    editor.selectionEnd = cursorPos;
+  }
+
+  highlightJS(code) {
+    return code
+      .replace(/(["'`])(.*?)\1/g, '<span class="string">$&</span>')
+      .replace(/\b(function|return|var|let|const|if|else|for|while|class|import|export|from|default|async|await)\b/g, '<span class="keyword">$&</span>')
+      .replace(/\b(\d+)\b/g, '<span class="number">$&</span>')
+      .replace(/(\/\/.*$)/gm, '<span class="comment">$&</span>')
+      .replace(/\b(console|window|document|Math|Array|Object|String|Number)\b/g, '<span class="built-in">$&</span>');
+  }
+
+  highlightHTML(code) {
+    return code
+      .replace(/(&lt;[^&]*&gt;)/g, '<span class="tag">$&</span>')
+      .replace(/(\w+)=/g, '<span class="attribute">$&</span>')
+      .replace(/(["'])(.*?)\1/g, '<span class="string">$&</span>')
+      .replace(/(&lt;!--.*?--&gt;)/g, '<span class="comment">$&</span>');
+  }
+
+  highlightCSS(code) {
+    return code
+      .replace(/([^{}]*)({[^}]*})/g, '<span class="selector">$1</span><span class="block">$2</span>')
+      .replace(/([\w-]+):/g, '<span class="property">$&</span>')
+      .replace(/(#[a-f\d]{3,6})\b/gi, '<span class="color">$&</span>')
+      .replace(/(\/\*.*?\*\/)/g, '<span class="comment">$&</span>')
+      .replace(/(@\w+)/g, '<span class="at-rule">$&</span>');
+  }
+
+  highlightNANS(code) {
+    return code; // Basic handling, could be expanded for specific highlighing rules later
+  }
+
+  updateLineNumbers() {
+    const editor = document.getElementById('codeEditor');
+    const lineNumbers = document.querySelector('.line-numbers');
+    const content = editor.value;
+    const lines = content.split('\n').length;
+    
+    lineNumbers.innerHTML = Array(lines).fill(0)
+      .map((_, i) => `<div>${i + 1}</div>`)
+      .join('');
+
+    // Sync scroll position
+    editor.addEventListener('scroll', () => {
+      lineNumbers.scrollTop = editor.scrollTop;
+    });
+  }
+
+  createItem() {
+    const name = document.getElementById('itemName').value;
+    const type = document.getElementById('itemType').value;
+
+    const newItem = {
+      id: Date.now(),
+      name: name.endsWith('.' + type) ? name : name + '.' + type,
+      type,
+      children: []
+    };
+
+    this.items.push(newItem);
+    this.saveHierarchy();
+    this.renderHierarchy();
+
+    const successMsg = document.getElementById('hierarchySuccess');
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+      closeModal('hierarchyModal');
+    }, 1500);
+  }
+
+  addFileToHierarchy(asset) {
+    const fileExt = asset.name.split('.').pop().toLowerCase();
+    const newItem = {
+      id: asset.id,
+      name: asset.name,
+      type: fileExt,
+      content: asset.content,
+      children: []
+    };
+
+    this.items.push(newItem);
+    this.saveHierarchy();
+    this.renderHierarchy();
+  }
+
+  deleteItem(id) {
+    showDialog(
+      'Confirm Delete',
+      'Are you sure you want to delete this item?',
+      () => {
+        this.items = this.removeItem(id, this.items);
+        this.saveHierarchy();
+        this.renderHierarchy();
+      }
+    );
+  }
+
+  handleDragStart(e) {
+    if (e.target.classList.contains('asset-item')) {
+      e.dataTransfer.setData('text/plain', e.target.dataset.id);
+    }
+  }
+
+  handleDragOver(e) {
+    e.preventDefault();
+    const target = e.target.closest('.tree-item');
+    if (target) {
+      target.classList.add('dragover');
+    }
+  }
+
+  handleDrop(e) {
+    e.preventDefault();
+    const target = e.target.closest('.tree-item');
+    if (target) {
+      const assetId = e.dataTransfer.getData('text/plain');
+      const asset = window.assetManager.assets.find(a => a.id === parseInt(assetId));
+      if (asset) {
+        this.addFileToHierarchy(asset);
+      }
+      target.classList.remove('dragover');
+    }
+  }
+
+  findItem(id, items) {
+    for (let item of items) {
+      if (item.id === id) {
+        return item;
+      }
+      if (item.children && item.children.length) {
+        const found = this.findItem(id, item.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  removeItem(id, items) {
+    return items.filter(item => {
+      if (item.id === id) {
+        return false;
+      }
+      if (item.children && item.children.length) {
+        item.children = this.removeItem(id, item.children);
+      }
+      return true;
+    });
+  }
+
+  saveHierarchy() {
+    localStorage.setItem('hierarchy', JSON.stringify(this.items));
+  }
+
+  renderHierarchy() {
+    const treeView = document.querySelector('.tree-view');
+    treeView.innerHTML = this.renderItems(this.items);
+  }
+
+  renderItems(items, level = 0) {
+    return items.map(item => {
+      let fileIcon = '📄';
+      switch(item.type) {
+        case 'js':
+          fileIcon = '📜'; 
+          break;
+        case 'html':
+          fileIcon = '🌐';
+          break;
+        case 'css':
+          fileIcon = '🎨';
+          break;
+        case 'nans':
+          fileIcon = 'ꙮ';
+          break;
+      }
+
+      const isMainScene = item.id === this.mainSceneId;
+      const mainSceneClass = isMainScene ? 'main-scene' : '';
+
+      return `
+        <div class="tree-item ${mainSceneClass}" data-id="${item.id}" draggable="true" 
+             style="padding-left: ${level * 20}px"
+             onclick="hierarchyManager.showItemModal(${item.id})">
+          <span class="icon file-icon">${fileIcon}</span>
+          ${item.name}
+          <div class="crud-buttons" onclick="event.stopPropagation()">
+            <button onclick="hierarchyManager.deleteItem(${item.id})">Delete</button>
+          </div>
+          ${item.children ? this.renderItems(item.children, level + 1) : ''}
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// Initialize in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  window.engine = new GameEngine();
+  window.assetManager = new AssetManager();
+  window.dependencyManager = new DependencyManager(); // Initialize dependency manager globally
+  window.hierarchyManager = new HierarchyManager();
+});
+
+function toggleSection(sectionId) {
+  const content = document.getElementById(`${sectionId}-content`);
+  const header = content.previousElementSibling;
+  const arrow = header.querySelector('.dropdown-arrow');
+
+  if (content && header) {
+    // Toggle classes for content and header
+    content.classList.toggle('collapsed');
+    header.classList.toggle('collapsed');
+    
+    // Animate arrow rotation
+    if (content.classList.contains('collapsed')) {
+      arrow.style.transform = 'rotate(-90deg)';
+      content.style.maxHeight = '0';
+      content.style.opacity = '0';
+    } else {
+      arrow.style.transform = 'rotate(0deg)';
+      content.style.maxHeight = content.scrollHeight + 'px';
+      content.style.opacity = '1';
+    }
+  }
+}
+
+function addDependency() {
+  const input = document.getElementById('newDependencyInput');
+  const value = input.value.trim();
+
+  if (value.startsWith('<script')) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = value;
+    const scriptTag = tempDiv.querySelector('script');
+
+    if (scriptTag) {
+      const src = scriptTag.getAttribute('src');
+      const integrity = scriptTag.getAttribute('integrity');
+      const crossorigin = scriptTag.getAttribute('crossorigin');
+
+      window.dependencyManager.addDependency(src, integrity, crossorigin);
+    }
+  } else {
+    window.dependencyManager.addDependency(value);
+  }
+
+  input.value = '';
+}
+
+function updateCDN() {
+  const cdnUrl = document.getElementById('cdnInput').value;
+  const scriptElement = document.querySelector('script[src*="nandraki"]');
+  if (scriptElement) {
+    scriptElement.src = cdnUrl;
+  }
+  window.dependencyManager.saveDependencies();
+  closeModal('cdnModal');
+}
+
+function openCreateModal() {
+  document.getElementById('createModal').style.display = 'block';
+}
+
+function openMixModal() {
+  document.getElementById('mixModal').style.display = 'block';
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+function deleteAsset(id) {
+  window.assetManager.deleteAsset(id);
+}
+
+function openHierarchyModal() {
+  document.getElementById('hierarchyModal').style.display = 'block';
+}
+
+function openCdnModal() {
+  document.getElementById('cdnModal').style.display = 'block';
+}
+
+function handleConsoleInput(event) {
+  if (event.key === 'Enter') {
+    const input = event.target.value.trim();
+    if (!input) return;
+
+    console.log(`> ${input}`);
+
+    try {
+      // Handle special commands
+      if (input === 'clear' || input === 'console.clear()') {
+        console.clear();
+      } else if (input === 'reset' || input === 'console.reset()') {
+        console.clear();
+        console.info('Console reset. Type JavaScript code below to execute.');
+      } else {
+        const result = eval(input);
+        if (result !== undefined) {
+          console.log(result);
+        }
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+
+    event.target.value = '';
+  }
+}
+
+function showDialog(title, message, onConfirm) {
+  const modal = document.getElementById('dialogModal');
+  document.getElementById('dialogTitle').textContent = title;
+  document.getElementById('dialogMessage').textContent = message;
+
+  const confirmBtn = document.getElementById('dialogConfirm');
+  confirmBtn.onclick = () => {
+    onConfirm();
+    closeModal('dialogModal');
+  };
+
+  modal.style.display = 'block';
+}
+
+function indentCode() {
+  const editor = document.getElementById('codeEditor');
+  const content = editor.value;
+  
+  // Get file type from editor filename
+  const fileName = document.getElementById('editorFileName').textContent;
+  const fileType = fileName.split('.').pop().toLowerCase();
+  
+  let formattedCode = content;
+  
+  try {
+    switch(fileType) {
+      case 'js':
+        // Basic JS formatting
+        formattedCode = js_beautify(content, {
+          indent_size: 2,
+          space_in_empty_paren: true
+        });
+        break;
+        
+      case 'html':
+        // Basic HTML formatting
+        formattedCode = html_beautify(content, {
+          indent_size: 2,
+          max_preserve_newlines: 2,
+          wrap_line_length: 0
+        });
+        break;
+        
+      case 'css':
+        // Basic CSS formatting
+        formattedCode = css_beautify(content, {
+          indent_size: 2
+        });
+        break;
+        
+      default:
+        // Basic indentation for other files
+        formattedCode = content.split('\n').map(line => {
+          return line.trim();
+        }).join('\n');
+    }
+    
+    editor.value = formattedCode;
+    window.hierarchyManager.updateLineNumbers();
+    window.hierarchyManager.applySyntaxHighlighting(fileType);
+  } catch(e) {
+    console.error('Error formatting code:', e);
+  }
+}
+
+function searchInCode() {
+  const searchTerm = prompt('Enter search term:');
+  if (!searchTerm) return;
+  
+  const editor = document.getElementById('codeEditor');
+  const content = editor.value;
+  const searchRegex = new RegExp(searchTerm, 'gi');
+  
+  let match;
+  let matches = [];
+  while ((match = searchRegex.exec(content)) !== null) {
+    matches.push(match.index);
+  }
+  
+  if (matches.length > 0) {
+    // Highlight first match
+    editor.focus();
+    editor.setSelectionRange(matches[0], matches[0] + searchTerm.length);
+    
+    // Store matches for future navigation
+    editor.dataset.searchMatches = JSON.stringify(matches);
+    editor.dataset.currentMatch = 0;
+    
+    alert(`Found ${matches.length} matches`);
+  } else {
+    alert('No matches found');
+  }
+}
+
+function replaceInCode() {
+  const searchTerm = prompt('Enter search term:');
+  if (!searchTerm) return;
+  
+  const replaceTerm = prompt('Enter replacement:');
+  if (replaceTerm === null) return;
+  
+  const editor = document.getElementById('codeEditor');
+  const content = editor.value;
+  
+  const searchRegex = new RegExp(searchTerm, 'g');
+  const newContent = content.replace(searchRegex, replaceTerm);
+  
+  editor.value = newContent;
+  window.hierarchyManager.updateLineNumbers();
+  
+  // Get file type and reapply syntax highlighting
+  const fileName = document.getElementById('editorFileName').textContent;
+  const fileType = fileName.split('.').pop().toLowerCase();
+  window.hierarchyManager.applySyntaxHighlighting(fileType);
+}
+</script></body></html>
